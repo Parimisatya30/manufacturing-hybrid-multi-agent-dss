@@ -1,0 +1,74 @@
+{
+  "sources": [
+    {
+      "source_id": "MES_SCHEMA",
+      "source_type": "database",
+      "title": "Manufacturing MES SQLite database",
+      "locator": "data/raw/MES.db"
+    }
+  ],
+  "entities": {
+    "Machine": {
+      "description": "Manufacturing machine or production equipment.",
+      "synonyms": [
+        "equipment",
+        "production machine"
+      ],
+      "source_ids": [
+        "MES_SCHEMA"
+      ]
+    },
+    "WorkOrder": {
+      "description": "Production work order representing planned manufacturing work.",
+      "synonyms": [
+        "production order",
+        "manufacturing order"
+      ],
+      "source_ids": [
+        "MES_SCHEMA"
+      ]
+    },
+    "Downtime": {
+      "description": "Recorded period during which a machine is unavailable for production.",
+      "synonyms": [
+        "machine downtime",
+        "production downtime"
+      ],
+      "source_ids": [
+        "MES_SCHEMA"
+      ]
+    }
+  },
+  "attributes": {
+    "Machine.MachineID": {
+      "description": "Unique identifier for a machine.",
+      "semantic_type": "identifier",
+      "synonyms": [
+        "machine id",
+        "equipment id"
+      ],
+      "source_ids": [
+        "MES_SCHEMA"
+      ]
+    },
+    "Machine.Status": {
+      "description": "Current operating status of the machine.",
+      "semantic_type": "status",
+      "synonyms": [
+        "machine state",
+        "equipment status"
+      ],
+      "source_ids": [
+        "MES_SCHEMA"
+      ]
+    },
+    "Machine.EfficiencyFactor": {
+      "description": "Efficiency factor associated with the machine.",
+      "semantic_type": "efficiency",
+      "source_ids": [
+        "MES_SCHEMA"
+      ]
+    }
+  },
+  "metrics": {}
+}

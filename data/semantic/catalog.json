@@ -1,0 +1,1976 @@
+{
+  "entities": [
+    {
+      "name": "BillOfMaterial",
+      "description": "",
+      "table_name": "BillOfMaterials",
+      "attributes": [
+        {
+          "name": "BOMID",
+          "description": "",
+          "table_name": "BillOfMaterials",
+          "column_name": "BOMID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ProductID",
+          "description": "",
+          "table_name": "BillOfMaterials",
+          "column_name": "ProductID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ComponentID",
+          "description": "",
+          "table_name": "BillOfMaterials",
+          "column_name": "ComponentID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Quantity",
+          "description": "",
+          "table_name": "BillOfMaterials",
+          "column_name": "Quantity",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ScrapFactor",
+          "description": "",
+          "table_name": "BillOfMaterials",
+          "column_name": "ScrapFactor",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "BillOfMaterial",
+          "relationship": "references",
+          "target_entity": "Inventory"
+        },
+        {
+          "source_entity": "BillOfMaterial",
+          "relationship": "references",
+          "target_entity": "Product"
+        }
+      ],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "Defect",
+      "description": "",
+      "table_name": "Defects",
+      "attributes": [
+        {
+          "name": "DefectID",
+          "description": "",
+          "table_name": "Defects",
+          "column_name": "DefectID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "CheckID",
+          "description": "",
+          "table_name": "Defects",
+          "column_name": "CheckID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "DefectType",
+          "description": "",
+          "table_name": "Defects",
+          "column_name": "DefectType",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Severity",
+          "description": "",
+          "table_name": "Defects",
+          "column_name": "Severity",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Quantity",
+          "description": "",
+          "table_name": "Defects",
+          "column_name": "Quantity",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Location",
+          "description": "",
+          "table_name": "Defects",
+          "column_name": "Location",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "RootCause",
+          "description": "",
+          "table_name": "Defects",
+          "column_name": "RootCause",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ActionTaken",
+          "description": "",
+          "table_name": "Defects",
+          "column_name": "ActionTaken",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "Defect",
+          "relationship": "references",
+          "target_entity": "QualityControl"
+        }
+      ],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "Downtime",
+      "description": "Recorded period during which a machine is unavailable for production.",
+      "table_name": "Downtimes",
+      "attributes": [
+        {
+          "name": "DowntimeID",
+          "description": "",
+          "table_name": "Downtimes",
+          "column_name": "DowntimeID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "MachineID",
+          "description": "",
+          "table_name": "Downtimes",
+          "column_name": "MachineID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "OrderID",
+          "description": "",
+          "table_name": "Downtimes",
+          "column_name": "OrderID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "StartTime",
+          "description": "",
+          "table_name": "Downtimes",
+          "column_name": "StartTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "EndTime",
+          "description": "",
+          "table_name": "Downtimes",
+          "column_name": "EndTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Duration",
+          "description": "",
+          "table_name": "Downtimes",
+          "column_name": "Duration",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Reason",
+          "description": "",
+          "table_name": "Downtimes",
+          "column_name": "Reason",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Category",
+          "description": "",
+          "table_name": "Downtimes",
+          "column_name": "Category",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Description",
+          "description": "",
+          "table_name": "Downtimes",
+          "column_name": "Description",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ReportedBy",
+          "description": "",
+          "table_name": "Downtimes",
+          "column_name": "ReportedBy",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "Downtime",
+          "relationship": "references",
+          "target_entity": "Employee"
+        },
+        {
+          "source_entity": "Downtime",
+          "relationship": "references",
+          "target_entity": "WorkOrder"
+        },
+        {
+          "source_entity": "Downtime",
+          "relationship": "references",
+          "target_entity": "Machine"
+        }
+      ],
+      "synonyms": [
+        "machine downtime",
+        "production downtime"
+      ],
+      "source_ids": [
+        "MES_SCHEMA"
+      ]
+    },
+    {
+      "name": "Employee",
+      "description": "",
+      "table_name": "Employees",
+      "attributes": [
+        {
+          "name": "EmployeeID",
+          "description": "",
+          "table_name": "Employees",
+          "column_name": "EmployeeID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Name",
+          "description": "",
+          "table_name": "Employees",
+          "column_name": "Name",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Role",
+          "description": "",
+          "table_name": "Employees",
+          "column_name": "Role",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ShiftID",
+          "description": "",
+          "table_name": "Employees",
+          "column_name": "ShiftID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "HourlyRate",
+          "description": "",
+          "table_name": "Employees",
+          "column_name": "HourlyRate",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Skills",
+          "description": "",
+          "table_name": "Employees",
+          "column_name": "Skills",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "HireDate",
+          "description": "",
+          "table_name": "Employees",
+          "column_name": "HireDate",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "Employee",
+          "relationship": "references",
+          "target_entity": "Shift"
+        }
+      ],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "Inventory",
+      "description": "",
+      "table_name": "Inventory",
+      "attributes": [
+        {
+          "name": "ItemID",
+          "description": "",
+          "table_name": "Inventory",
+          "column_name": "ItemID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Name",
+          "description": "",
+          "table_name": "Inventory",
+          "column_name": "Name",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Category",
+          "description": "",
+          "table_name": "Inventory",
+          "column_name": "Category",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Quantity",
+          "description": "",
+          "table_name": "Inventory",
+          "column_name": "Quantity",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ReorderLevel",
+          "description": "",
+          "table_name": "Inventory",
+          "column_name": "ReorderLevel",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "SupplierID",
+          "description": "",
+          "table_name": "Inventory",
+          "column_name": "SupplierID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "LeadTime",
+          "description": "",
+          "table_name": "Inventory",
+          "column_name": "LeadTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Cost",
+          "description": "",
+          "table_name": "Inventory",
+          "column_name": "Cost",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "LotNumber",
+          "description": "",
+          "table_name": "Inventory",
+          "column_name": "LotNumber",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Location",
+          "description": "",
+          "table_name": "Inventory",
+          "column_name": "Location",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "LastReceivedDate",
+          "description": "",
+          "table_name": "Inventory",
+          "column_name": "LastReceivedDate",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "Inventory",
+          "relationship": "references",
+          "target_entity": "Supplier"
+        }
+      ],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "MachineSensor",
+      "description": "",
+      "table_name": "MachineSensors",
+      "attributes": [
+        {
+          "name": "SensorID",
+          "description": "",
+          "table_name": "MachineSensors",
+          "column_name": "SensorID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "MachineID",
+          "description": "",
+          "table_name": "MachineSensors",
+          "column_name": "MachineID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "SensorType",
+          "description": "",
+          "table_name": "MachineSensors",
+          "column_name": "SensorType",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Location",
+          "description": "",
+          "table_name": "MachineSensors",
+          "column_name": "Location",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Unit",
+          "description": "",
+          "table_name": "MachineSensors",
+          "column_name": "Unit",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "SamplingRate",
+          "description": "",
+          "table_name": "MachineSensors",
+          "column_name": "SamplingRate",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "IsActive",
+          "description": "",
+          "table_name": "MachineSensors",
+          "column_name": "IsActive",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "MachineSensor",
+          "relationship": "references",
+          "target_entity": "Machine"
+        }
+      ],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "Machine",
+      "description": "Manufacturing machine or production equipment.",
+      "table_name": "Machines",
+      "attributes": [
+        {
+          "name": "MachineID",
+          "description": "Unique identifier for a machine.",
+          "table_name": "Machines",
+          "column_name": "MachineID",
+          "semantic_type": "identifier",
+          "synonyms": [
+            "machine id",
+            "equipment id"
+          ],
+          "unit": "",
+          "source_ids": [
+            "MES_SCHEMA"
+          ]
+        },
+        {
+          "name": "Name",
+          "description": "",
+          "table_name": "Machines",
+          "column_name": "Name",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Type",
+          "description": "",
+          "table_name": "Machines",
+          "column_name": "Type",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "WorkCenterID",
+          "description": "",
+          "table_name": "Machines",
+          "column_name": "WorkCenterID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Status",
+          "description": "Current operating status of the machine.",
+          "table_name": "Machines",
+          "column_name": "Status",
+          "semantic_type": "status",
+          "synonyms": [
+            "machine state",
+            "equipment status"
+          ],
+          "unit": "",
+          "source_ids": [
+            "MES_SCHEMA"
+          ]
+        },
+        {
+          "name": "NominalCapacity",
+          "description": "",
+          "table_name": "Machines",
+          "column_name": "NominalCapacity",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "CapacityUOM",
+          "description": "",
+          "table_name": "Machines",
+          "column_name": "CapacityUOM",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "SetupTime",
+          "description": "",
+          "table_name": "Machines",
+          "column_name": "SetupTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "EfficiencyFactor",
+          "description": "Efficiency factor associated with the machine.",
+          "table_name": "Machines",
+          "column_name": "EfficiencyFactor",
+          "semantic_type": "efficiency",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": [
+            "MES_SCHEMA"
+          ]
+        },
+        {
+          "name": "MaintenanceFrequency",
+          "description": "",
+          "table_name": "Machines",
+          "column_name": "MaintenanceFrequency",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "LastMaintenanceDate",
+          "description": "",
+          "table_name": "Machines",
+          "column_name": "LastMaintenanceDate",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "NextMaintenanceDate",
+          "description": "",
+          "table_name": "Machines",
+          "column_name": "NextMaintenanceDate",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ProductChangeoverTime",
+          "description": "",
+          "table_name": "Machines",
+          "column_name": "ProductChangeoverTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "CostPerHour",
+          "description": "",
+          "table_name": "Machines",
+          "column_name": "CostPerHour",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "InstallationDate",
+          "description": "",
+          "table_name": "Machines",
+          "column_name": "InstallationDate",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ModelNumber",
+          "description": "",
+          "table_name": "Machines",
+          "column_name": "ModelNumber",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "Machine",
+          "relationship": "references",
+          "target_entity": "WorkCenter"
+        }
+      ],
+      "synonyms": [
+        "equipment",
+        "production machine"
+      ],
+      "source_ids": [
+        "MES_SCHEMA"
+      ]
+    },
+    {
+      "name": "MaterialConsumption",
+      "description": "",
+      "table_name": "MaterialConsumption",
+      "attributes": [
+        {
+          "name": "ConsumptionID",
+          "description": "",
+          "table_name": "MaterialConsumption",
+          "column_name": "ConsumptionID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "OrderID",
+          "description": "",
+          "table_name": "MaterialConsumption",
+          "column_name": "OrderID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ItemID",
+          "description": "",
+          "table_name": "MaterialConsumption",
+          "column_name": "ItemID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "PlannedQuantity",
+          "description": "",
+          "table_name": "MaterialConsumption",
+          "column_name": "PlannedQuantity",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ActualQuantity",
+          "description": "",
+          "table_name": "MaterialConsumption",
+          "column_name": "ActualQuantity",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "VariancePercent",
+          "description": "",
+          "table_name": "MaterialConsumption",
+          "column_name": "VariancePercent",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ConsumptionDate",
+          "description": "",
+          "table_name": "MaterialConsumption",
+          "column_name": "ConsumptionDate",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "LotNumber",
+          "description": "",
+          "table_name": "MaterialConsumption",
+          "column_name": "LotNumber",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "MaterialConsumption",
+          "relationship": "references",
+          "target_entity": "Inventory"
+        },
+        {
+          "source_entity": "MaterialConsumption",
+          "relationship": "references",
+          "target_entity": "WorkOrder"
+        }
+      ],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "OEEMetric",
+      "description": "",
+      "table_name": "OEEMetrics",
+      "attributes": [
+        {
+          "name": "MetricID",
+          "description": "",
+          "table_name": "OEEMetrics",
+          "column_name": "MetricID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "MachineID",
+          "description": "",
+          "table_name": "OEEMetrics",
+          "column_name": "MachineID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Date",
+          "description": "",
+          "table_name": "OEEMetrics",
+          "column_name": "Date",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Availability",
+          "description": "",
+          "table_name": "OEEMetrics",
+          "column_name": "Availability",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Performance",
+          "description": "",
+          "table_name": "OEEMetrics",
+          "column_name": "Performance",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Quality",
+          "description": "",
+          "table_name": "OEEMetrics",
+          "column_name": "Quality",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "OEE",
+          "description": "",
+          "table_name": "OEEMetrics",
+          "column_name": "OEE",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "PlannedProductionTime",
+          "description": "",
+          "table_name": "OEEMetrics",
+          "column_name": "PlannedProductionTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ActualProductionTime",
+          "description": "",
+          "table_name": "OEEMetrics",
+          "column_name": "ActualProductionTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Downtime",
+          "description": "",
+          "table_name": "OEEMetrics",
+          "column_name": "Downtime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "OEEMetric",
+          "relationship": "references",
+          "target_entity": "Machine"
+        }
+      ],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "PredictiveMaintenance",
+      "description": "",
+      "table_name": "PredictiveMaintenance",
+      "attributes": [
+        {
+          "name": "PredictionID",
+          "description": "",
+          "table_name": "PredictiveMaintenance",
+          "column_name": "PredictionID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "MachineID",
+          "description": "",
+          "table_name": "PredictiveMaintenance",
+          "column_name": "MachineID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "PredictionDate",
+          "description": "",
+          "table_name": "PredictiveMaintenance",
+          "column_name": "PredictionDate",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "FailureMode",
+          "description": "",
+          "table_name": "PredictiveMaintenance",
+          "column_name": "FailureMode",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "PredictedFailureDate",
+          "description": "",
+          "table_name": "PredictiveMaintenance",
+          "column_name": "PredictedFailureDate",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Confidence",
+          "description": "",
+          "table_name": "PredictiveMaintenance",
+          "column_name": "Confidence",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "RemainingUsefulLife",
+          "description": "",
+          "table_name": "PredictiveMaintenance",
+          "column_name": "RemainingUsefulLife",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "RecommendedAction",
+          "description": "",
+          "table_name": "PredictiveMaintenance",
+          "column_name": "RecommendedAction",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Priority",
+          "description": "",
+          "table_name": "PredictiveMaintenance",
+          "column_name": "Priority",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Status",
+          "description": "",
+          "table_name": "PredictiveMaintenance",
+          "column_name": "Status",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "PredictiveMaintenance",
+          "relationship": "references",
+          "target_entity": "Machine"
+        }
+      ],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "Product",
+      "description": "",
+      "table_name": "Products",
+      "attributes": [
+        {
+          "name": "ProductID",
+          "description": "",
+          "table_name": "Products",
+          "column_name": "ProductID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Name",
+          "description": "",
+          "table_name": "Products",
+          "column_name": "Name",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Description",
+          "description": "",
+          "table_name": "Products",
+          "column_name": "Description",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Category",
+          "description": "",
+          "table_name": "Products",
+          "column_name": "Category",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Cost",
+          "description": "",
+          "table_name": "Products",
+          "column_name": "Cost",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "StandardProcessTime",
+          "description": "",
+          "table_name": "Products",
+          "column_name": "StandardProcessTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "IsActive",
+          "description": "",
+          "table_name": "Products",
+          "column_name": "IsActive",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "QualityControl",
+      "description": "",
+      "table_name": "QualityControl",
+      "attributes": [
+        {
+          "name": "CheckID",
+          "description": "",
+          "table_name": "QualityControl",
+          "column_name": "CheckID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "OrderID",
+          "description": "",
+          "table_name": "QualityControl",
+          "column_name": "OrderID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Date",
+          "description": "",
+          "table_name": "QualityControl",
+          "column_name": "Date",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Result",
+          "description": "",
+          "table_name": "QualityControl",
+          "column_name": "Result",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Comments",
+          "description": "",
+          "table_name": "QualityControl",
+          "column_name": "Comments",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "DefectRate",
+          "description": "",
+          "table_name": "QualityControl",
+          "column_name": "DefectRate",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ReworkRate",
+          "description": "",
+          "table_name": "QualityControl",
+          "column_name": "ReworkRate",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "YieldRate",
+          "description": "",
+          "table_name": "QualityControl",
+          "column_name": "YieldRate",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "InspectorID",
+          "description": "",
+          "table_name": "QualityControl",
+          "column_name": "InspectorID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "QualityControl",
+          "relationship": "references",
+          "target_entity": "Employee"
+        },
+        {
+          "source_entity": "QualityControl",
+          "relationship": "references",
+          "target_entity": "WorkOrder"
+        }
+      ],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "SensorData",
+      "description": "",
+      "table_name": "SensorData",
+      "attributes": [
+        {
+          "name": "DataID",
+          "description": "",
+          "table_name": "SensorData",
+          "column_name": "DataID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "SensorID",
+          "description": "",
+          "table_name": "SensorData",
+          "column_name": "SensorID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Timestamp",
+          "description": "",
+          "table_name": "SensorData",
+          "column_name": "Timestamp",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Value",
+          "description": "",
+          "table_name": "SensorData",
+          "column_name": "Value",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Status",
+          "description": "",
+          "table_name": "SensorData",
+          "column_name": "Status",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "OrderID",
+          "description": "",
+          "table_name": "SensorData",
+          "column_name": "OrderID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "SensorData",
+          "relationship": "references",
+          "target_entity": "WorkOrder"
+        },
+        {
+          "source_entity": "SensorData",
+          "relationship": "references",
+          "target_entity": "MachineSensor"
+        }
+      ],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "Shift",
+      "description": "",
+      "table_name": "Shifts",
+      "attributes": [
+        {
+          "name": "ShiftID",
+          "description": "",
+          "table_name": "Shifts",
+          "column_name": "ShiftID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Name",
+          "description": "",
+          "table_name": "Shifts",
+          "column_name": "Name",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "StartTime",
+          "description": "",
+          "table_name": "Shifts",
+          "column_name": "StartTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "EndTime",
+          "description": "",
+          "table_name": "Shifts",
+          "column_name": "EndTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Capacity",
+          "description": "",
+          "table_name": "Shifts",
+          "column_name": "Capacity",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "IsWeekend",
+          "description": "",
+          "table_name": "Shifts",
+          "column_name": "IsWeekend",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "Supplier",
+      "description": "",
+      "table_name": "Suppliers",
+      "attributes": [
+        {
+          "name": "SupplierID",
+          "description": "",
+          "table_name": "Suppliers",
+          "column_name": "SupplierID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Name",
+          "description": "",
+          "table_name": "Suppliers",
+          "column_name": "Name",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "LeadTime",
+          "description": "",
+          "table_name": "Suppliers",
+          "column_name": "LeadTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ReliabilityScore",
+          "description": "",
+          "table_name": "Suppliers",
+          "column_name": "ReliabilityScore",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ContactInfo",
+          "description": "",
+          "table_name": "Suppliers",
+          "column_name": "ContactInfo",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "VibrationAnalysi",
+      "description": "",
+      "table_name": "VibrationAnalysis",
+      "attributes": [
+        {
+          "name": "AnalysisID",
+          "description": "",
+          "table_name": "VibrationAnalysis",
+          "column_name": "AnalysisID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "MachineID",
+          "description": "",
+          "table_name": "VibrationAnalysis",
+          "column_name": "MachineID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Timestamp",
+          "description": "",
+          "table_name": "VibrationAnalysis",
+          "column_name": "Timestamp",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "RMS_Velocity",
+          "description": "",
+          "table_name": "VibrationAnalysis",
+          "column_name": "RMS_Velocity",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Peak_Acceleration",
+          "description": "",
+          "table_name": "VibrationAnalysis",
+          "column_name": "Peak_Acceleration",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Frequency_Dominant",
+          "description": "",
+          "table_name": "VibrationAnalysis",
+          "column_name": "Frequency_Dominant",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Temperature",
+          "description": "",
+          "table_name": "VibrationAnalysis",
+          "column_name": "Temperature",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Load_Current",
+          "description": "",
+          "table_name": "VibrationAnalysis",
+          "column_name": "Load_Current",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Spindle_Speed",
+          "description": "",
+          "table_name": "VibrationAnalysis",
+          "column_name": "Spindle_Speed",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Feed_Rate",
+          "description": "",
+          "table_name": "VibrationAnalysis",
+          "column_name": "Feed_Rate",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Health_Score",
+          "description": "",
+          "table_name": "VibrationAnalysis",
+          "column_name": "Health_Score",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Anomaly_Flag",
+          "description": "",
+          "table_name": "VibrationAnalysis",
+          "column_name": "Anomaly_Flag",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "OrderID",
+          "description": "",
+          "table_name": "VibrationAnalysis",
+          "column_name": "OrderID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "VibrationAnalysi",
+          "relationship": "references",
+          "target_entity": "WorkOrder"
+        },
+        {
+          "source_entity": "VibrationAnalysi",
+          "relationship": "references",
+          "target_entity": "Machine"
+        }
+      ],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "WorkCenter",
+      "description": "",
+      "table_name": "WorkCenters",
+      "attributes": [
+        {
+          "name": "WorkCenterID",
+          "description": "",
+          "table_name": "WorkCenters",
+          "column_name": "WorkCenterID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Name",
+          "description": "",
+          "table_name": "WorkCenters",
+          "column_name": "Name",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Description",
+          "description": "",
+          "table_name": "WorkCenters",
+          "column_name": "Description",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Capacity",
+          "description": "",
+          "table_name": "WorkCenters",
+          "column_name": "Capacity",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "CapacityUOM",
+          "description": "",
+          "table_name": "WorkCenters",
+          "column_name": "CapacityUOM",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "CostPerHour",
+          "description": "",
+          "table_name": "WorkCenters",
+          "column_name": "CostPerHour",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Location",
+          "description": "",
+          "table_name": "WorkCenters",
+          "column_name": "Location",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "IsActive",
+          "description": "",
+          "table_name": "WorkCenters",
+          "column_name": "IsActive",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [],
+      "synonyms": [],
+      "source_ids": []
+    },
+    {
+      "name": "WorkOrder",
+      "description": "Production work order representing planned manufacturing work.",
+      "table_name": "WorkOrders",
+      "attributes": [
+        {
+          "name": "OrderID",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "OrderID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ProductID",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "ProductID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "WorkCenterID",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "WorkCenterID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "MachineID",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "MachineID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "EmployeeID",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "EmployeeID",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Quantity",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "Quantity",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "PlannedStartTime",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "PlannedStartTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "PlannedEndTime",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "PlannedEndTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ActualStartTime",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "ActualStartTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ActualEndTime",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "ActualEndTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Status",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "Status",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Priority",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "Priority",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "LeadTime",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "LeadTime",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "LotNumber",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "LotNumber",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "ActualProduction",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "ActualProduction",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "Scrap",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "Scrap",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        },
+        {
+          "name": "SetupTimeActual",
+          "description": "",
+          "table_name": "WorkOrders",
+          "column_name": "SetupTimeActual",
+          "semantic_type": "",
+          "synonyms": [],
+          "unit": "",
+          "source_ids": []
+        }
+      ],
+      "relationships": [
+        {
+          "source_entity": "WorkOrder",
+          "relationship": "references",
+          "target_entity": "Employee"
+        },
+        {
+          "source_entity": "WorkOrder",
+          "relationship": "references",
+          "target_entity": "Machine"
+        },
+        {
+          "source_entity": "WorkOrder",
+          "relationship": "references",
+          "target_entity": "WorkCenter"
+        },
+        {
+          "source_entity": "WorkOrder",
+          "relationship": "references",
+          "target_entity": "Product"
+        }
+      ],
+      "synonyms": [
+        "production order",
+        "manufacturing order"
+      ],
+      "source_ids": [
+        "MES_SCHEMA"
+      ]
+    }
+  ],
+  "metrics": []
+}

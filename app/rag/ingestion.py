@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import re
 from pathlib import Path
@@ -308,6 +308,8 @@ class PDFDocumentLoader:
         return candidates
 
     @staticmethod
+
+    @staticmethod
     def _clean_text(text: str) -> str:
         """
         Normalize extracted PDF text.
@@ -326,8 +328,7 @@ class PDFDocumentLoader:
             text,
         )
 
-        # Remove bullet characters that occur at the beginning
-        # of subsequent extracted lines.
+        # Remove bullet characters at the beginning of subsequent lines.
         text = re.sub(
             r"\n\s*[•●▪◦]\s*",
             "\n",
@@ -387,55 +388,59 @@ class PDFDocumentLoader:
             has_bold_font,
         )
 
+
     @staticmethod
     def _classify_text_block(
         text: str,
         max_font_size: float,
         has_bold_font: bool,
     ) -> str:
-        """
-        Classify a text block.
+        """Classify extracted PDF text using deterministic heuristics."""
 
-        This is intentionally heuristic.
+        # Recognize workflow instructions before applying the formula guard.
+        # Some valid workflow steps contain expressions such as:
+        # "Status = resolved".
+        workflow_step = re.match(
+            r"^\s*\d+\s+"
+            r"(?:"
+            r"[A-Z][A-Za-z& /-]{1,35}\s+[â€”â€“-]\s+\S"
+            r"|"
+            r"(?:Rank|Trigger|Contain|Investigate|Identify|Correct|"
+            r"Verify|Corroborate|Classify|Schedule|Resolve)\b"
+            r")",
+            text,
+            flags=re.IGNORECASE,
+        )
 
-        We do not use an LLM to determine structural boundaries.
+        if workflow_step:
+            return "workflow_step"
 
-        Heading detection uses:
-        - numbered heading patterns
-        - sufficiently large font
-        - short bold text
+        # Formula-like expressions should not be classified as headings.
+        if re.search(r"[=Ã—Ã·]", text):
+            return "paragraph"
 
-        Formula-like text is explicitly prevented from being
-        classified as a heading.
-        """
-
+        # Numbered section headings, such as:
+        # "1. RCA Workflow"
+        # "2. Defect Types by Area"
         numbered_heading = re.match(
             r"^\s*\d+(?:\.\d+)*[.)]?\s+\S+",
             text,
         )
 
+        short_text = len(text) <= 120
         large_font = max_font_size >= 15.0
 
-        looks_like_formula = (
-            " = " in text
-            or "×" in text
-        )
-
-        short_bold_heading = (
+        bold_heading = (
             has_bold_font
-            and len(text) <= 120
-            and max_font_size >= 10.5
-            and not looks_like_formula
+            and short_text
+            and not text.endswith(".")
         )
 
-        if (
-            large_font
-            or numbered_heading
-            or short_bold_heading
-        ):
+        if large_font or numbered_heading or bold_heading:
             return "heading"
 
         return "paragraph"
+
 
     @staticmethod
     def _is_repeated_document_chrome(

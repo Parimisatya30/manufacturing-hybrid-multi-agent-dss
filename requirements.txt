@@ -2,3 +2,4 @@ python-dotenv
 
 opentelemetry-api
 opentelemetry-sdk
+sentence-transformers

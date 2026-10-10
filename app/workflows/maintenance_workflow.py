@@ -3,7 +3,7 @@
 
 from typing import Any
 from uuid import uuid4
-
+from app.decision.approval_policy import ApprovalPolicy
 from app.context.manager import ContextManager, create_request_context
 from app.context.models import ToolResult
 from app.decision.decision_engine import DecisionEngine
@@ -183,6 +183,19 @@ class MaintenanceWorkflow:
             )
 
         collector.add_to_context(context_manager)
+
+        decision = self.decision_engine.evaluate(context)
+
+        # Phase 16: determine whether human approval is required.
+        approval_decision = ApprovalPolicy().evaluate(decision)
+
+        decision["approval"] = {
+            "required": approval_decision.required,
+            "status": approval_decision.status.value,
+            "reason": approval_decision.reason,
+        }
+
+        decision["machine_id"] = machine_id
 
         decision = self.decision_engine.evaluate(context)
         decision["machine_id"] = machine_id

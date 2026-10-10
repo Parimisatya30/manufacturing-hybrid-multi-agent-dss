@@ -1,7 +1,7 @@
 """Collect evidence from SQL, rules, and RAG sources."""
 
 from typing import Any
-from app.observability.traceability import TraceabilityRegistry
+
 from app.context.models import Evidence
 from app.rag.vector_store import SearchResult
 from app.observability.traceability import (

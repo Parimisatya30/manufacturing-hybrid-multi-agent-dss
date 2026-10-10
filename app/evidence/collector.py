@@ -1,22 +1,67 @@
 """Collect evidence from SQL, rules, and RAG sources."""
 
 from typing import Any
-
+from app.observability.traceability import TraceabilityRegistry
 from app.context.models import Evidence
 from app.rag.vector_store import SearchResult
-
+from app.observability.traceability import (
+    TraceabilityRegistry,
+    TraceabilitySource,
+)
 
 class EvidenceCollector:
     """Normalize evidence from different DSS tools."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        traceability_registry: TraceabilityRegistry | None = None,
+    ) -> None:
         self._evidence: list[Evidence] = []
+        self._traceability_registry = traceability_registry
+
+    def _register_traceability_source(self, evidence: Evidence) -> None:
+        """Register an evidence source if it is not already known."""
+        if self._traceability_registry is None:
+            return
+
+        registry = self._traceability_registry
+
+        if registry.get_source(evidence.source_id) is not None:
+            return
+
+        source_type = str(evidence.metadata.get("source_type", "unknown"))
+
+        if source_type == "rag":
+            document_id = str(
+                evidence.metadata.get("document_id", evidence.source_id)
+            )
+            chunk_id = str(evidence.metadata.get("chunk_id", ""))
+            pages = evidence.metadata.get("page_numbers", [])
+
+            locator = f"{document_id}/{chunk_id}"
+            if pages:
+                locator += f"; pages={pages}"
+
+            title = f"Knowledge document: {document_id}"
+        else:
+            locator = evidence.source_id
+            title = f"{source_type.title()} source: {evidence.source_id}"
+
+        registry.register_source(
+            TraceabilitySource(
+                source_id=evidence.source_id,
+                source_type=source_type,
+                title=title,
+                locator=locator,
+            )
+        )
 
     def add_to_context(self, context_manager) -> int:
-        """Transfer collected evidence into the request context."""
+        """Register evidence sources and transfer evidence into context."""
         evidence_items = self.collect()
 
         for evidence in evidence_items:
+            self._register_traceability_source(evidence)
             context_manager.add_evidence(evidence)
 
         return len(evidence_items)

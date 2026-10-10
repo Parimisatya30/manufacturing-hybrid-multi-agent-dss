@@ -4,8 +4,34 @@ from app.rag.models import DocumentChunk
 from app.rag.vector_store import SearchResult
 from app.context.manager import ContextManager
 from app.context.models import RequestContext
+from app.observability.traceability import TraceabilityRegistry
 
+def test_add_to_context_registers_traceability_sources():
+    registry = TraceabilityRegistry()
+    collector = EvidenceCollector(traceability_registry=registry)
 
+    collector.add_sql_evidence(
+        "MES:VibrationAnalysis",
+        [{"machine_id": "M-01", "vibration": 11.2}],
+    )
+
+    context_manager = ContextManager(
+        RequestContext(
+            request_id="REQ-TRACE-001",
+            user_query="Investigate machine vibration",
+        )
+    )
+
+    count = collector.add_to_context(context_manager)
+
+    assert count == 1
+    assert len(context_manager.context.evidence) == 1
+
+    source = registry.get_source("MES:VibrationAnalysis")
+    assert source is not None
+    assert source.source_type == "sql"
+    assert source.locator == "MES:VibrationAnalysis"
+    
 
 def test_add_to_context_transfers_collected_evidence():
     collector = EvidenceCollector()

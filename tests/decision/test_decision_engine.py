@@ -210,3 +210,46 @@ def test_empty_sensor_data_does_not_imply_normal_machine_health():
     result = DecisionEngine().evaluate(context)
 
     assert result["overall_status"] == "INSUFFICIENT_DATA"
+
+
+def test_critical_finding_references_supporting_evidence():
+    context = RequestContext(
+        request_id="req-traceability",
+        user_query="Investigate machine breakdown",
+    )
+
+    context.tool_results.append(
+        ToolResult(
+            tool_name="machine_lookup",
+            success=True,
+            data=[
+                {
+                    "MachineID": 8,
+                    "Name": "Machine Whe-40",
+                    "Status": "breakdown",
+                }
+            ],
+        )
+    )
+
+    context.evidence.append(
+        Evidence(
+            source_id="MES:Machines",
+            content="Machine Whe-40 has status breakdown",
+            metadata={"source_type": "sql"},
+        )
+    )
+
+    result = DecisionEngine().evaluate(context)
+
+    assert result["overall_status"] == "CRITICAL"
+    assert "findings" in result
+
+    breakdown_finding = next(
+        finding
+        for finding in result["findings"]
+        if "breakdown" in finding["finding"].lower()
+    )
+
+    assert breakdown_finding["severity"] == "CRITICAL"
+    assert "MES:Machines" in breakdown_finding["source_ids"]

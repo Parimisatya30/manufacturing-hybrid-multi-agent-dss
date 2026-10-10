@@ -19,6 +19,7 @@ class DecisionEngine:
         ]
 
         statuses: list[str] = []
+
         for result in successful_results:
             statuses.extend(self._extract_statuses(result.data))
 
@@ -27,8 +28,6 @@ class DecisionEngine:
                 statuses.extend(
                     self._extract_machine_statuses(result.data)
                 )
-
-
 
         # Missing sensor readings mean machine health cannot be fully assessed.
         incomplete_health_data = any(
@@ -41,6 +40,7 @@ class DecisionEngine:
             for result in successful_results
         )
 
+        # Preserve existing status priority.
         if "CRITICAL" in statuses:
             overall_status = "CRITICAL"
         elif "WARNING" in statuses:
@@ -63,6 +63,7 @@ class DecisionEngine:
             "request_id": context.request_id,
             "user_query": context.user_query,
             "overall_status": overall_status,
+            "findings": self._build_findings(context),
             "tool_results": len(context.tool_results),
             "successful_tools": len(successful_results),
             "failed_tools": len(failed_results),
@@ -85,11 +86,129 @@ class DecisionEngine:
         }
 
     @staticmethod
+    def _build_findings(
+        context: RequestContext,
+    ) -> list[dict[str, Any]]:
+        """Build machine-state findings and link supporting evidence."""
+        findings: list[dict[str, Any]] = []
+
+        for result in context.tool_results:
+            if not result.success or result.tool_name != "machine_lookup":
+                continue
+
+            if isinstance(result.data, dict):
+                rows = [result.data]
+            elif isinstance(result.data, (list, tuple)):
+                rows = [
+                    row
+                    for row in result.data
+                    if isinstance(row, dict)
+                ]
+            else:
+                continue
+
+            for row in rows:
+                status_value = row.get("Status", row.get("status"))
+
+                if not isinstance(status_value, str):
+                    continue
+
+                machine_status = status_value.strip().lower()
+
+                if machine_status == "breakdown":
+                    severity = "CRITICAL"
+                    finding_text = "Machine is in breakdown"
+                    reason = (
+                        "Machine lookup reported breakdown status."
+                    )
+                elif machine_status == "maintenance":
+                    severity = "WARNING"
+                    finding_text = "Machine is under maintenance"
+                    reason = (
+                        "Machine lookup reported maintenance status."
+                    )
+                else:
+                    # Do not infer a finding from an unrecognized state.
+                    continue
+
+                machine_name = row.get("Name", row.get("name"))
+                machine_id = row.get(
+                    "MachineID",
+                    row.get("machine_id"),
+                )
+
+                source_ids: list[str] = []
+
+                for evidence in context.evidence:
+                    content = evidence.content.lower()
+                    metadata = evidence.metadata
+
+                    # Match evidence content to the machine and its state.
+                    content_matches = (
+                        machine_status in content
+                        and (
+                            machine_name is None
+                            or str(machine_name).lower() in content
+                        )
+                    )
+
+                    # SQL evidence may contain the original result rows.
+                    evidence_rows = metadata.get("rows", [])
+
+                    metadata_matches = (
+                        isinstance(evidence_rows, list)
+                        and any(
+                            isinstance(item, dict)
+                            and str(
+                                item.get(
+                                    "Status",
+                                    item.get("status", ""),
+                                )
+                            ).strip().lower()
+                            == machine_status
+                            and (
+                                machine_id is None
+                                or str(
+                                    item.get(
+                                        "MachineID",
+                                        item.get("machine_id", ""),
+                                    )
+                                )
+                                == str(machine_id)
+                            )
+                            and (
+                                machine_name is None
+                                or str(
+                                    item.get("Name", item.get("name", ""))
+                                ).strip().lower()
+                                == str(machine_name).strip().lower()
+                            )
+                            for item in evidence_rows
+                        )
+                    )
+
+                    if content_matches or metadata_matches:
+                        source_ids.append(evidence.source_id)
+
+                findings.append(
+                    {
+                        "finding": finding_text,
+                        "severity": severity,
+                        "source_ids": list(dict.fromkeys(source_ids)),
+                        "reason": reason,
+                    }
+                )
+
+        return findings
+
+    @staticmethod
     def _extract_statuses(data: Any) -> list[str]:
         """Extract known rule statuses from supported result structures."""
         if isinstance(data, dict):
             statuses = []
+
             status = data.get("status")
+
             if isinstance(status, str) and status in {
                 "NORMAL",
                 "WARNING",
@@ -99,14 +218,20 @@ class DecisionEngine:
 
             for value in data.values():
                 if isinstance(value, (dict, list, tuple)):
-                    statuses.extend(DecisionEngine._extract_statuses(value))
+                    statuses.extend(
+                        DecisionEngine._extract_statuses(value)
+                    )
 
             return statuses
 
         if isinstance(data, (list, tuple)):
             statuses = []
+
             for item in data:
-                statuses.extend(DecisionEngine._extract_statuses(item))
+                statuses.extend(
+                    DecisionEngine._extract_statuses(item)
+                )
+
             return statuses
 
         return []
@@ -117,7 +242,9 @@ class DecisionEngine:
         if isinstance(data, dict):
             rows = [data]
         elif isinstance(data, (list, tuple)):
-            rows = [row for row in data if isinstance(row, dict)]
+            rows = [
+                row for row in data if isinstance(row, dict)
+            ]
         else:
             return []
 
@@ -125,6 +252,7 @@ class DecisionEngine:
 
         for row in rows:
             value = row.get("Status", row.get("status"))
+
             if not isinstance(value, str):
                 continue
 

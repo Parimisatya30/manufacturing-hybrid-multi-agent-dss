@@ -23,13 +23,11 @@ class DecisionEngine:
         for result in successful_results:
             statuses.extend(self._extract_statuses(result.data))
 
-            # Operational state is authoritative for the machine lookup.
             if result.tool_name == "machine_lookup":
                 statuses.extend(
                     self._extract_machine_statuses(result.data)
                 )
 
-        # Missing sensor readings mean machine health cannot be fully assessed.
         incomplete_health_data = any(
             result.tool_name in {"vibration_analysis", "sensor_data"}
             and (
@@ -40,7 +38,6 @@ class DecisionEngine:
             for result in successful_results
         )
 
-        # Preserve existing status priority.
         if "CRITICAL" in statuses:
             overall_status = "CRITICAL"
         elif "WARNING" in statuses:
@@ -89,115 +86,197 @@ class DecisionEngine:
     def _build_findings(
         context: RequestContext,
     ) -> list[dict[str, Any]]:
-        """Build machine-state findings and link supporting evidence."""
+        """Build findings from machine states and rule evaluations."""
         findings: list[dict[str, Any]] = []
 
         for result in context.tool_results:
-            if not result.success or result.tool_name != "machine_lookup":
+            if not result.success:
                 continue
 
-            if isinstance(result.data, dict):
-                rows = [result.data]
-            elif isinstance(result.data, (list, tuple)):
-                rows = [
-                    row
-                    for row in result.data
-                    if isinstance(row, dict)
-                ]
+            if result.tool_name == "machine_lookup":
+                findings.extend(
+                    DecisionEngine._build_machine_findings(
+                        result.data,
+                        context,
+                    )
+                )
+
+            elif result.tool_name.endswith("_rule"):
+                findings.extend(
+                    DecisionEngine._build_rule_findings(
+                        result.data,
+                        context,
+                    )
+                )
+
+        return findings
+
+    @staticmethod
+    def _build_machine_findings(
+        data: Any,
+        context: RequestContext,
+    ) -> list[dict[str, Any]]:
+        """Build findings for explicit machine operational states."""
+        if isinstance(data, dict):
+            rows = [data]
+        elif isinstance(data, (list, tuple)):
+            rows = [row for row in data if isinstance(row, dict)]
+        else:
+            return []
+
+        findings = []
+
+        for row in rows:
+            status_value = row.get("Status", row.get("status"))
+            if not isinstance(status_value, str):
+                continue
+
+            machine_status = status_value.strip().lower()
+
+            if machine_status == "breakdown":
+                severity = "CRITICAL"
+                finding_text = "Machine is in breakdown"
+                reason = "Machine lookup reported breakdown status."
+            elif machine_status == "maintenance":
+                severity = "WARNING"
+                finding_text = "Machine is under maintenance"
+                reason = "Machine lookup reported maintenance status."
             else:
                 continue
 
-            for row in rows:
-                status_value = row.get("Status", row.get("status"))
+            machine_name = row.get("Name", row.get("name"))
+            machine_id = row.get("MachineID", row.get("machine_id"))
+            source_ids = []
 
-                if not isinstance(status_value, str):
-                    continue
+            for evidence in context.evidence:
+                content = evidence.content.lower()
+                metadata = evidence.metadata
 
-                machine_status = status_value.strip().lower()
-
-                if machine_status == "breakdown":
-                    severity = "CRITICAL"
-                    finding_text = "Machine is in breakdown"
-                    reason = (
-                        "Machine lookup reported breakdown status."
+                content_matches = (
+                    machine_status in content
+                    and (
+                        machine_name is None
+                        or str(machine_name).lower() in content
                     )
-                elif machine_status == "maintenance":
-                    severity = "WARNING"
-                    finding_text = "Machine is under maintenance"
-                    reason = (
-                        "Machine lookup reported maintenance status."
-                    )
-                else:
-                    # Do not infer a finding from an unrecognized state.
-                    continue
-
-                machine_name = row.get("Name", row.get("name"))
-                machine_id = row.get(
-                    "MachineID",
-                    row.get("machine_id"),
                 )
 
-                source_ids: list[str] = []
-
-                for evidence in context.evidence:
-                    content = evidence.content.lower()
-                    metadata = evidence.metadata
-
-                    # Match evidence content to the machine and its state.
-                    content_matches = (
-                        machine_status in content
+                evidence_rows = metadata.get("rows", [])
+                metadata_matches = (
+                    isinstance(evidence_rows, list)
+                    and any(
+                        isinstance(item, dict)
+                        and str(
+                            item.get("Status", item.get("status", ""))
+                        ).strip().lower() == machine_status
+                        and (
+                            machine_id is None
+                            or str(
+                                item.get(
+                                    "MachineID",
+                                    item.get("machine_id", ""),
+                                )
+                            ) == str(machine_id)
+                        )
                         and (
                             machine_name is None
-                            or str(machine_name).lower() in content
-                        )
-                    )
-
-                    # SQL evidence may contain the original result rows.
-                    evidence_rows = metadata.get("rows", [])
-
-                    metadata_matches = (
-                        isinstance(evidence_rows, list)
-                        and any(
-                            isinstance(item, dict)
-                            and str(
-                                item.get(
-                                    "Status",
-                                    item.get("status", ""),
-                                )
+                            or str(
+                                item.get("Name", item.get("name", ""))
                             ).strip().lower()
-                            == machine_status
-                            and (
-                                machine_id is None
-                                or str(
-                                    item.get(
-                                        "MachineID",
-                                        item.get("machine_id", ""),
-                                    )
-                                )
-                                == str(machine_id)
-                            )
-                            and (
-                                machine_name is None
-                                or str(
-                                    item.get("Name", item.get("name", ""))
-                                ).strip().lower()
-                                == str(machine_name).strip().lower()
-                            )
-                            for item in evidence_rows
+                            == str(machine_name).strip().lower()
                         )
+                        for item in evidence_rows
                     )
-
-                    if content_matches or metadata_matches:
-                        source_ids.append(evidence.source_id)
-
-                findings.append(
-                    {
-                        "finding": finding_text,
-                        "severity": severity,
-                        "source_ids": list(dict.fromkeys(source_ids)),
-                        "reason": reason,
-                    }
                 )
+
+                if content_matches or metadata_matches:
+                    source_ids.append(evidence.source_id)
+
+            findings.append(
+                {
+                    "finding": finding_text,
+                    "severity": severity,
+                    "source_ids": list(dict.fromkeys(source_ids)),
+                    "reason": reason,
+                }
+            )
+
+        return findings
+
+    @staticmethod
+    def _build_rule_findings(
+        data: Any,
+        context: RequestContext,
+    ) -> list[dict[str, Any]]:
+        """Build findings from rule results and link matching rule evidence."""
+        if not isinstance(data, dict):
+            return []
+
+        metric = data.get("metric")
+        status = data.get("status")
+
+        if (
+            not isinstance(metric, str)
+            or not isinstance(status, str)
+            or status not in {"WARNING", "CRITICAL"}
+        ):
+            return []
+
+        value = data.get("value")
+        unit = data.get("unit", "")
+        reason = data.get("reason") or (
+            f"{metric} evaluated as {status}."
+        )
+
+        findings = []
+
+        for evidence in context.evidence:
+            metadata = evidence.metadata
+
+            if metadata.get("source_type") != "rule":
+                continue
+            if metadata.get("metric") != metric:
+                continue
+            if metadata.get("status") != status:
+                continue
+
+            # If both sides contain a measured value, require it to match.
+            evidence_value = metadata.get("value")
+            if evidence_value is not None and value is not None:
+                if evidence_value != value:
+                    continue
+
+            findings.append(
+                {
+                    "finding": (
+                        f"{metric.replace('_', ' ').title()} "
+                        f"is {status.lower()}"
+                    ),
+                    "severity": status,
+                    "source_ids": [evidence.source_id],
+                    "reason": reason,
+                    "metric": metric,
+                    "value": value,
+                    "unit": unit,
+                }
+            )
+
+        # Don't claim a source supports a finding when no matching
+        # rule evidence exists in the request context.
+        if not findings:
+            findings.append(
+                {
+                    "finding": (
+                        f"{metric.replace('_', ' ').title()} "
+                        f"is {status.lower()}"
+                    ),
+                    "severity": status,
+                    "source_ids": [],
+                    "reason": reason,
+                    "metric": metric,
+                    "value": value,
+                    "unit": unit,
+                }
+            )
 
         return findings
 
@@ -206,7 +285,6 @@ class DecisionEngine:
         """Extract known rule statuses from supported result structures."""
         if isinstance(data, dict):
             statuses = []
-
             status = data.get("status")
 
             if isinstance(status, str) and status in {
@@ -226,12 +304,10 @@ class DecisionEngine:
 
         if isinstance(data, (list, tuple)):
             statuses = []
-
             for item in data:
                 statuses.extend(
                     DecisionEngine._extract_statuses(item)
                 )
-
             return statuses
 
         return []
@@ -242,9 +318,7 @@ class DecisionEngine:
         if isinstance(data, dict):
             rows = [data]
         elif isinstance(data, (list, tuple)):
-            rows = [
-                row for row in data if isinstance(row, dict)
-            ]
+            rows = [row for row in data if isinstance(row, dict)]
         else:
             return []
 
@@ -252,7 +326,6 @@ class DecisionEngine:
 
         for row in rows:
             value = row.get("Status", row.get("status"))
-
             if not isinstance(value, str):
                 continue
 

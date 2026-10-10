@@ -253,3 +253,52 @@ def test_critical_finding_references_supporting_evidence():
 
     assert breakdown_finding["severity"] == "CRITICAL"
     assert "MES:Machines" in breakdown_finding["source_ids"]
+
+
+def test_critical_vibration_finding_references_rule_evidence():
+    context = RequestContext(
+        request_id="req-vibration-traceability",
+        user_query="Investigate critical machine vibration",
+    )
+
+    context.tool_results.append(
+        ToolResult(
+            tool_name="vibration_rule",
+            success=True,
+            data={
+                "metric": "vibration",
+                "value": 11.2,
+                "unit": "mm/s",
+                "status": "CRITICAL",
+                "warning_threshold": 7.0,
+                "critical_threshold": 10.0,
+                "reason": "Vibration exceeded the critical threshold.",
+            },
+        )
+    )
+
+    context.evidence.append(
+        Evidence(
+            source_id="RULE:vibration",
+            content="Vibration exceeded the critical threshold.",
+            metadata={
+                "source_type": "rule",
+                "metric": "vibration",
+                "status": "CRITICAL",
+                "value": 11.2,
+            },
+        )
+    )
+
+    result = DecisionEngine().evaluate(context)
+
+    assert result["overall_status"] == "CRITICAL"
+
+    vibration_finding = next(
+        finding
+        for finding in result["findings"]
+        if "vibration" in finding["finding"].lower()
+    )
+
+    assert vibration_finding["severity"] == "CRITICAL"
+    assert "RULE:vibration" in vibration_finding["source_ids"]

@@ -1,4 +1,4 @@
-
+﻿
 """Tests for the manufacturing decision engine."""
 
 from app.context.models import Evidence, RequestContext, ToolResult
@@ -161,3 +161,52 @@ def test_machine_in_maintenance_is_warning_without_critical_rules():
     result = DecisionEngine().evaluate(context)
 
     assert result["overall_status"] == "WARNING"
+
+
+
+def test_empty_successful_result_returns_insufficient_data():
+    """An empty result must not be treated as a healthy assessment."""
+    context = RequestContext(
+        request_id="req-empty",
+        user_query="Check machine health",
+    )
+    context.tool_results.append(
+        ToolResult(
+            tool_name="vibration_analysis",
+            success=True,
+            data=[],
+        )
+    )
+
+    result = DecisionEngine().evaluate(context)
+
+    assert result["overall_status"] == "INSUFFICIENT_DATA"
+
+def test_empty_sensor_data_does_not_imply_normal_machine_health():
+    """Machine records alone do not establish normal sensor health."""
+    context = RequestContext(
+        request_id="req-partial-sensor-data",
+        user_query="Check machine health",
+    )
+    context.tool_results.extend([
+        ToolResult(
+            tool_name="machine_lookup",
+            success=True,
+            data=[
+                {
+                    "MachineID": 1,
+                    "Name": "Machine 1",
+                    "Status": "operational",
+                }
+            ],
+        ),
+        ToolResult(
+            tool_name="vibration_analysis",
+            success=True,
+            data=[],
+        ),
+    ])
+
+    result = DecisionEngine().evaluate(context)
+
+    assert result["overall_status"] == "INSUFFICIENT_DATA"

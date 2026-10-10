@@ -1,4 +1,4 @@
-
+﻿
 """Decision engine for aggregating manufacturing tool results."""
 
 from typing import Any
@@ -28,14 +28,36 @@ class DecisionEngine:
                     self._extract_machine_statuses(result.data)
                 )
 
+
+
+        # Missing sensor readings mean machine health cannot be fully assessed.
+        incomplete_health_data = any(
+            result.tool_name in {"vibration_analysis", "sensor_data"}
+            and (
+                result.data is None
+                or result.data == []
+                or result.data == {}
+            )
+            for result in successful_results
+        )
+
         if "CRITICAL" in statuses:
             overall_status = "CRITICAL"
         elif "WARNING" in statuses:
             overall_status = "WARNING"
-        elif successful_results:
-            overall_status = "NORMAL"
-        else:
+        elif incomplete_health_data:
             overall_status = "INSUFFICIENT_DATA"
+        elif not successful_results:
+            overall_status = "INSUFFICIENT_DATA"
+        elif all(
+            result.data is None
+            or result.data == []
+            or result.data == {}
+            for result in successful_results
+        ):
+            overall_status = "INSUFFICIENT_DATA"
+        else:
+            overall_status = "NORMAL"
 
         return {
             "request_id": context.request_id,

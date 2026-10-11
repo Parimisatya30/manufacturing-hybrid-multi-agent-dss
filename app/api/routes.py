@@ -1,11 +1,13 @@
 """FastAPI routes for the Manufacturing DSS."""
 
+from functools import lru_cache
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, field_validator
 
 from app.synthesis.maintenance_service import MaintenanceService
+from app.synthesis.service_factory import create_maintenance_service
 
 
 router = APIRouter(
@@ -15,7 +17,7 @@ router = APIRouter(
 
 
 class MaintenanceInvestigationRequest(BaseModel):
-    """Request to investigate a manufacturing machine."""
+    """Validate incoming maintenance investigation requests."""
 
     machine_id: int = Field(gt=0)
     user_query: str = Field(min_length=1, max_length=2000)
@@ -24,21 +26,24 @@ class MaintenanceInvestigationRequest(BaseModel):
     @field_validator("user_query")
     @classmethod
     def validate_user_query(cls, value: str) -> str:
+        """Reject queries containing only whitespace."""
         if not value.strip():
             raise ValueError("user_query must not be blank")
+
         return value.strip()
 
 
 class MaintenanceInvestigationResponse(BaseModel):
-    """Decision and synthesized response from an investigation."""
+    """Response containing the decision and synthesized explanation."""
 
     decision: dict[str, Any]
     response: dict[str, Any]
 
 
-def get_maintenance_service() -> MaintenanceService | None:
-    """Provide the service; configure it before serving investigations."""
-    return None
+@lru_cache(maxsize=1)
+def get_maintenance_service() -> MaintenanceService:
+    """Create and reuse one maintenance service per application process."""
+    return create_maintenance_service()
 
 
 @router.post(
@@ -49,9 +54,9 @@ def investigate_maintenance(
     request: MaintenanceInvestigationRequest,
     service: MaintenanceService | None = Depends(get_maintenance_service),
 ) -> MaintenanceInvestigationResponse:
-    """Run a maintenance investigation and synthesize its response."""
+    """Investigate a machine and return an evidence-grounded response."""
 
-    # Request validation happens before this check.
+    # Return 503 if the service is deliberately unavailable.
     if service is None:
         raise HTTPException(
             status_code=503,
@@ -64,10 +69,15 @@ def investigate_maintenance(
             user_query=request.user_query,
             request_id=request.request_id,
         )
+
         return MaintenanceInvestigationResponse(**result)
 
     except (TypeError, ValueError) as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        ) from exc
+
     except Exception as exc:
         raise HTTPException(
             status_code=500,

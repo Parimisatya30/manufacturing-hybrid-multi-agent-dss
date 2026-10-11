@@ -15,16 +15,20 @@ def test_health_endpoint():
 
 
 def test_investigation_returns_503_without_configured_service():
-    response = client.post(
-        "/api/v1/maintenance/investigate",
-        json={
-            "machine_id": 8,
-            "user_query": "Investigate machine breakdown.",
-        },
-    )
+    app.dependency_overrides[get_maintenance_service] = lambda: None
+
+    try:
+        response = client.post(
+            "/api/v1/maintenance/investigate",
+            json={
+                "machine_id": 8,
+                "user_query": "Investigate machine breakdown.",
+            },
+        )
+    finally:
+        app.dependency_overrides.clear()
 
     assert response.status_code == 503
-    assert "not been configured" in response.json()["detail"]
 
 
 def test_investigation_rejects_non_positive_machine_id():

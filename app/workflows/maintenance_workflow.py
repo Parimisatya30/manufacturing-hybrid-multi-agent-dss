@@ -196,9 +196,6 @@ class MaintenanceWorkflow:
         }
 
         decision["machine_id"] = machine_id
-
-        decision = self.decision_engine.evaluate(context)
-        decision["machine_id"] = machine_id
         decision["data_availability"] = {
             name: bool(rows) for name, rows in query_rows.items()
         }

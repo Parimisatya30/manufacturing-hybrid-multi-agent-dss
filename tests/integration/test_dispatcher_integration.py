@@ -92,34 +92,64 @@ def test_dispatch_work_orders_uses_real_database(dispatcher):
     if response["result"]:
         assert "OrderID" in response["result"][0]
 
-def test_dispatch_complex_investigation_invokes_react_agent():
-    """Verify complex investigations are dispatched to the ReAct agent."""
-    agent = MagicMock()
-    agent.run_with_policy.return_value = MagicMock(
-        request_id="dispatcher-react-test",
-        iterations=2,
-        stop_reason="sufficient_evidence",
-        actions_executed=["machine_lookup", "predictive_maintenance"],
-    )
+
+def test_dispatch_complex_investigation_invokes_rca_workflow():
+    """Verify root-cause investigations are dispatched to RCA."""
+    rca_workflow = MagicMock()
+    rca_workflow.run.return_value = {
+        "use_case": "root_cause_analysis",
+        "overall_status": "EVIDENCE_AVAILABLE",
+        "evidence_count": 3,
+    }
 
     dispatcher = RequestDispatcher(
         router=TaskRouter(),
-        react_agent=agent,
+        rca_workflow=rca_workflow,
     )
 
     response = dispatcher.dispatch(
         "Investigate the root cause and correlate possible causes",
-        request_id="dispatcher-react-test",
+        request_id="dispatcher-rca-test",
     )
 
-    assert response["execution_path"] == ExecutionPath.REACT.value
-    agent.run_with_policy.assert_called_once()
+    assert response["execution_path"] == ExecutionPath.RCA_WORKFLOW.value
+    assert response["result"]["use_case"] == "root_cause_analysis"
 
-    context = agent.run_with_policy.call_args.args[0]
-    assert context.request_id == "dispatcher-react-test"
-    assert context.user_query == (
-        "Investigate the root cause and correlate possible causes"
+    rca_workflow.run.assert_called_once_with(
+        user_query="Investigate the root cause and correlate possible causes",
+        request_id="dispatcher-rca-test",
     )
+
+
+def test_dispatch_complex_investigation_invokes_rca_workflow():
+    """Verify root-cause investigations are dispatched to RCA."""
+    rca_workflow = MagicMock()
+    rca_workflow.run.return_value = {
+        "use_case": "root_cause_analysis",
+        "overall_status": "EVIDENCE_AVAILABLE",
+        "evidence_count": 3,
+    }
+
+    dispatcher = RequestDispatcher(
+        router=TaskRouter(),
+        rca_workflow=rca_workflow,
+    )
+
+    query = "Investigate the root cause and correlate possible causes"
+    response = dispatcher.dispatch(
+        query,
+        request_id="dispatcher-rca-test",
+    )
+
+    assert response["execution_path"] == ExecutionPath.RCA_WORKFLOW.value
+    assert response["result"]["use_case"] == "root_cause_analysis"
+
+    rca_workflow.run.assert_called_once_with(
+        user_query=query,
+        request_id="dispatcher-rca-test",
+    )
+
+
 def test_dispatch_maintenance_request_uses_real_workflow(dispatcher):
     """Verify workflow dispatch using real MES data and PDF knowledge."""
     sql_tool = SQLTool(DATABASE_PATH)

@@ -20,12 +20,16 @@ class RequestDispatcher:
         rag_tool: Any | None = None,
         maintenance_workflow: Any | None = None,
         react_agent: ReActAgent | None = None,
+        rca_workflow: Any | None = None,
+        defect_workflow: Any | None = None,
     ) -> None:
         self.router = router
         self.sql_operations = sql_operations or {}
         self.rag_tool = rag_tool
         self.maintenance_workflow = maintenance_workflow
         self.react_agent = react_agent
+        self.rca_workflow = rca_workflow
+        self.defect_workflow = defect_workflow
 
     @staticmethod
     def _resolve_sql_operation(user_query: str) -> str:
@@ -114,12 +118,44 @@ class RequestDispatcher:
                 raise RuntimeError("Maintenance workflow is not configured")
 
             if machine_id is None:
+                match = re.search(
+                    r"\bmachine\s+#?(\d+)\b",
+                    user_query,
+                    re.IGNORECASE,
+                )
+                if match:
+                    machine_id = int(match.group(1))
+
+            if machine_id is None:
                 raise ValueError(
                     "machine_id is required for maintenance workflow"
                 )
 
+            if machine_id <= 0:
+                raise ValueError("machine_id must be positive")
+
             result = self.maintenance_workflow.run(
                 machine_id=machine_id,
+                user_query=user_query,
+                request_id=request_id,
+            )
+
+        elif decision.execution_path == ExecutionPath.RCA_WORKFLOW:
+            if self.rca_workflow is None:
+                raise RuntimeError("RCA workflow is not configured")
+
+            result = self.rca_workflow.run(
+                user_query=user_query,
+                request_id=request_id,
+            )
+
+        elif decision.execution_path == ExecutionPath.DEFECT_WORKFLOW:
+            if self.defect_workflow is None:
+                raise RuntimeError(
+                    "Defect monitoring workflow is not configured"
+                )
+
+            result = self.defect_workflow.run(
                 user_query=user_query,
                 request_id=request_id,
             )

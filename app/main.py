@@ -18,8 +18,8 @@ from app.observability.logging import (
 )
 from app.observability.metrics import metrics
 from app.observability import tracing as tracing_config  # noqa: F401
-
-
+from app.api.defect_routes import router as defect_router
+from app.api.rca_routes import router as rca_router
 configure_logging()
 
 logger = logging.getLogger(__name__)
@@ -119,7 +119,8 @@ async def observability_middleware(request: Request, call_next):
 
 
 app.include_router(router)
-
+app.include_router(defect_router)
+app.include_router(rca_router)
 
 @app.get("/health", tags=["Health"])
 def health_check() -> dict[str, str]:

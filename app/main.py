@@ -10,7 +10,11 @@ from fastapi import FastAPI, Request
 
 from app.api.routes import router
 from app.config.settings import settings
-from app.observability.logging import configure_logging
+from app.observability.logging import (
+    configure_logging,
+    reset_request_id,
+    set_request_id,
+)
 from app.observability.metrics import metrics
 
 
@@ -41,6 +45,8 @@ async def observability_middleware(request: Request, call_next):
     )
 
     request.state.request_id = request_id
+    request_id_token = set_request_id(request_id)
+
     start_time = time.perf_counter()
     status_code = 500
 
@@ -53,7 +59,6 @@ async def observability_middleware(request: Request, call_next):
         return response
 
     except Exception:
-        metrics.increment("api.errors")
         logger.exception(
             "HTTP request failed",
             extra={"request_id": request_id},
@@ -62,7 +67,6 @@ async def observability_middleware(request: Request, call_next):
 
     finally:
         duration_ms = (time.perf_counter() - start_time) * 1000
-
         metrics.observe("api.request.duration_ms", duration_ms)
 
         if status_code >= 500:
@@ -78,6 +82,8 @@ async def observability_middleware(request: Request, call_next):
                 "duration_ms": round(duration_ms, 2),
             },
         )
+
+        reset_request_id(request_id_token)
 
 
 app.include_router(router)

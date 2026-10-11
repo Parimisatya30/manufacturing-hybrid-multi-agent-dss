@@ -80,3 +80,24 @@ def test_server_error_increments_error_counter() -> None:
         after["counters"].get("api.errors", 0)
         == errors_before + 1
     )
+
+
+def test_request_id_is_available_in_logging_context() -> None:
+    from app.observability.logging import request_id_context
+
+    request_id = "correlation-test-123"
+
+    @app.get("/test-observability-correlation")
+    def test_correlation_endpoint() -> dict[str, str]:
+        return {
+            "request_id": request_id_context.get(),
+        }
+
+    response = client.get(
+        "/test-observability-correlation",
+        headers={"X-Request-ID": request_id},
+    )
+
+    assert response.status_code == 200
+    assert response.headers["X-Request-ID"] == request_id
+    assert response.json()["request_id"] == request_id

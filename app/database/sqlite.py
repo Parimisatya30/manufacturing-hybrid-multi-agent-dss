@@ -185,73 +185,95 @@ class SQLiteClient:
         query: str,
         parameters: tuple[Any, ...] = (),
     ) -> list[dict[str, Any]]:
-        """Execute a read-only SELECT query."""
+        """Execute a read-only SELECT or CTE query."""
 
-        normalized_query = query.strip().lower()
+        if not isinstance(query, str) or not query.strip():
+            raise ValueError("SQL query must not be empty.")
 
-        if not normalized_query.startswith("select"):
-            logger.warning(
-                "Rejected non-SELECT SQL query"
-            )
+        normalized_query = query.lstrip().lower()
 
-            raise ValueError(
-                "Only SELECT queries are allowed."
-            )
+        if not (
+            normalized_query.startswith("select")
+            or normalized_query.startswith("with")
+        ):
+            logger.warning("Rejected non-query SQL input")
+            raise ValueError("Only SELECT queries are allowed.")
+
+        # Allow only read operations and SELECT expressions.
+        allowed_actions = {
+            sqlite3.SQLITE_SELECT,
+            sqlite3.SQLITE_READ,
+            sqlite3.SQLITE_FUNCTION,
+            getattr(sqlite3, "SQLITE_RECURSIVE", -1),
+        }
+        authorizer_rejected = False
+
+        def authorize(
+            action: int,
+            arg1: str | None,
+            arg2: str | None,
+            database_name: str | None,
+            source: str | None,
+        ) -> int:
+            nonlocal authorizer_rejected
+
+            if action in allowed_actions:
+                return sqlite3.SQLITE_OK
+
+            authorizer_rejected = True
+            return sqlite3.SQLITE_DENY
 
         with tracer.start_as_current_span(
             "database.sqlite.execute_read_only"
         ) as span:
-
-            span.set_attribute(
-                "db.system",
-                "sqlite",
-            )
-
-            span.set_attribute(
-                "db.operation",
-                "SELECT",
-            )
+            span.set_attribute("db.system", "sqlite")
+            span.set_attribute("db.operation", "SELECT")
 
             metrics.increment("sql_queries_total")
 
             with metrics.timer("sql_query_duration_ms"):
                 try:
                     with self.connect() as connection:
-                        cursor = connection.execute(
-                            query,
-                            parameters,
-                        )
+                        connection.set_authorizer(authorize)
 
+                        cursor = connection.execute(query, parameters)
                         rows = [
-                            dict(row)
-                            for row in cursor.fetchall()
+                            dict(row) for row in cursor.fetchall()
                         ]
 
-                    metrics.increment(
-                        "sql_queries_success_total"
-                    )
-
-                    span.set_attribute(
-                        "db.row_count",
-                        len(rows),
-                    )
+                    metrics.increment("sql_queries_success_total")
+                    span.set_attribute("db.row_count", len(rows))
 
                     logger.info(
                         "Read-only SQL query completed",
-                        extra={
-                            "row_count": len(rows),
-                        },
+                        extra={"row_count": len(rows)},
                     )
 
                     return rows
 
+                except sqlite3.DatabaseError as exc:
+                    metrics.increment("sql_queries_failed_total")
+
+                    if authorizer_rejected:
+                        logger.warning(
+                            "Rejected SQL operation outside read-only policy"
+                        )
+                        raise ValueError(
+                            "Only read-only SELECT queries are allowed."
+                        ) from exc
+
+                    if isinstance(exc, sqlite3.ProgrammingError):
+                        logger.warning(
+                            "Rejected invalid or multiple SQL statements"
+                        )
+                        raise ValueError(
+                            "Only one SQL statement is allowed."
+                        ) from exc
+
+                    logger.exception("Read-only SQL query failed")
+                    raise
+
                 except Exception:
-                    metrics.increment(
-                        "sql_queries_failed_total"
-                    )
-
-                    logger.exception(
-                        "Read-only SQL query failed"
-                    )
-
+                    metrics.increment("sql_queries_failed_total")
+                    logger.exception("Read-only SQL query failed")
                     raise

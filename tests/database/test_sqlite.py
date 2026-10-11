@@ -1,4 +1,7 @@
+
 from pathlib import Path
+
+import pytest
 
 from app.database.sqlite import SQLiteClient
 
@@ -33,8 +36,52 @@ def test_read_only_query():
 def test_non_select_query_is_rejected():
     client = SQLiteClient(DATABASE_PATH)
 
-    try:
+    with pytest.raises(ValueError, match="SELECT"):
         client.execute_read_only("DELETE FROM Machines")
-        assert False, "DELETE query should have been rejected"
-    except ValueError as exc:
-        assert "SELECT" in str(exc)
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        "",
+        "   ",
+        "UPDATE Machines SET Status = 'stopped'",
+        "DELETE FROM Machines",
+        "INSERT INTO Machines (Name) VALUES ('test')",
+        "DROP TABLE Machines",
+    ],
+)
+def test_empty_or_write_query_is_rejected(query):
+    client = SQLiteClient(DATABASE_PATH)
+
+    with pytest.raises(ValueError):
+        client.execute_read_only(query)
+
+
+def test_multiple_sql_statements_are_rejected():
+    client = SQLiteClient(DATABASE_PATH)
+
+    with pytest.raises(ValueError):
+        client.execute_read_only(
+            "SELECT name FROM Machines; DELETE FROM Machines"
+        )
+
+
+def test_with_select_query_is_supported():
+    client = SQLiteClient(DATABASE_PATH)
+
+    results = client.execute_read_only(
+        """
+        WITH running_machines AS (
+            SELECT MachineID, Name
+            FROM Machines
+            WHERE Status = ?
+        )
+        SELECT MachineID, Name
+        FROM running_machines
+        """,
+        ("running",),
+    )
+
+    assert isinstance(results, list)
+    assert all(isinstance(row, dict) for row in results)

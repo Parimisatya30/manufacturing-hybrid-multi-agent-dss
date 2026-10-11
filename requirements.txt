@@ -1,5 +1,6 @@
 python-dotenv
-
+fastapi
+uvicorn[standard]
 opentelemetry-api
 opentelemetry-sdk
 sentence-transformers

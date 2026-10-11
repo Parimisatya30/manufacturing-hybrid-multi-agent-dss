@@ -32,6 +32,23 @@ class MaintenanceInvestigationRequest(BaseModel):
 
         return value.strip()
 
+    @field_validator("request_id")
+    @classmethod
+    def validate_request_id(cls, value: str | None) -> str | None:
+        """Reject blank or malformed request IDs."""
+        if value is None:
+            return None
+
+        value = value.strip()
+
+        if not value:
+            raise ValueError("request_id must not be blank")
+
+        if not value.replace("-", "").replace("_", "").isalnum():
+            raise ValueError("request_id contains invalid characters")
+
+        return value
+
 
 class MaintenanceInvestigationResponse(BaseModel):
     """Response containing the decision and synthesized explanation."""
@@ -75,7 +92,7 @@ def investigate_maintenance(
     except (TypeError, ValueError) as exc:
         raise HTTPException(
             status_code=400,
-            detail=str(exc),
+            detail="Invalid maintenance investigation request.",
         ) from exc
 
     except Exception as exc:

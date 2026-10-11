@@ -1,11 +1,15 @@
 
 """Bounded ReAct-style investigation agent."""
 
+import logging
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from app.context.manager import ContextManager
 from app.context.models import RequestContext, ToolResult
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -67,6 +71,7 @@ class MaintenanceInvestigationPolicy:
             for required_tool, _ in self.REQUIRED_ACTIONS
         )
 
+
 class ReActAgent:
     """Run approved investigation actions with a strict iteration limit."""
 
@@ -84,9 +89,12 @@ class ReActAgent:
             raise ValueError("max_iterations must be positive")
 
         self.max_iterations = max_iterations
-        self.actions = {action.name: action for action in (actions or [])}
+        configured_actions = actions or []
+        self.actions = {
+            action.name: action for action in configured_actions
+        }
 
-        if len(self.actions) != len(actions or []):
+        if len(self.actions) != len(configured_actions):
             raise ValueError("Action names must be unique")
 
     def run_with_policy(
@@ -176,12 +184,19 @@ class ReActAgent:
                 )
                 actions_executed.append(action.name)
 
-            except Exception as exc:
+            except Exception:
+                logger.exception(
+                    "ReAct action execution failed: "
+                    "request_id=%s action=%s tool=%s",
+                    context.request_id,
+                    action.name,
+                    action.tool_name,
+                )
                 context_manager.add_tool_result(
                     ToolResult(
                         tool_name=action.tool_name,
                         success=False,
-                        error=str(exc),
+                        error="Tool execution failed.",
                     )
                 )
 

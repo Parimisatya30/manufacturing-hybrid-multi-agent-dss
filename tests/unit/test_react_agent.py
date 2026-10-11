@@ -1,13 +1,16 @@
 
 """Tests for the bounded ReAct investigation agent."""
 
+import logging
+
 import pytest
 
 from app.agents.react_agent import (
     InvestigationAction,
+    MaintenanceInvestigationPolicy,
     ReActAgent,
 )
-from app.context.models import RequestContext
+from app.context.models import RequestContext, ToolResult
 
 
 @pytest.fixture
@@ -60,7 +63,42 @@ def test_continues_after_action_exception(context):
 
     assert result.actions_executed == []
     assert context.tool_results[-1].success is False
-    assert context.tool_results[-1].error == "Database unavailable"
+    assert context.tool_results[-1].error == "Tool execution failed."
+
+
+def test_action_exception_does_not_expose_internal_details(
+    context,
+    caplog,
+):
+    sensitive_message = (
+        "Database password or internal connection details"
+    )
+
+    def failing_action(ctx):
+        raise RuntimeError(sensitive_message)
+
+    action = InvestigationAction(
+        name="inspect_machine",
+        tool_name="machine_lookup",
+        execute=failing_action,
+    )
+    agent = ReActAgent(actions=[action])
+
+    with caplog.at_level(
+        logging.ERROR,
+        logger="app.agents.react_agent",
+    ):
+        result = agent.run(context, ["inspect_machine"])
+
+    error = context.tool_results[-1].error
+
+    assert result.actions_executed == []
+    assert context.tool_results[-1].success is False
+    assert error == "Tool execution failed."
+    assert sensitive_message not in error
+
+    # Internal diagnostics remain available to authorized server logs.
+    assert sensitive_message in caplog.text
 
 
 def test_enforces_maximum_iterations(context):
@@ -73,7 +111,11 @@ def test_enforces_maximum_iterations(context):
 
     result = agent.run(
         context,
-        ["inspect_machine", "inspect_machine", "inspect_machine"],
+        [
+            "inspect_machine",
+            "inspect_machine",
+            "inspect_machine",
+        ],
     )
 
     assert result.iterations == 2
@@ -101,18 +143,15 @@ def test_rejects_duplicate_action_names():
 
 
 def test_policy_stops_when_all_required_tools_succeed():
-    from app.agents.react_agent import (
-        InvestigationAction,
-        MaintenanceInvestigationPolicy,
-        ReActAgent,
-    )
-    from app.context.models import RequestContext, ToolResult
-
     context = RequestContext(
         request_id="test-sufficient",
         user_query="Investigate machine health",
         tool_results=[
-            ToolResult(tool_name="machine_lookup", success=True, data={}),
+            ToolResult(
+                tool_name="machine_lookup",
+                success=True,
+                data={},
+            ),
             ToolResult(
                 tool_name="predictive_maintenance",
                 success=True,
@@ -123,7 +162,11 @@ def test_policy_stops_when_all_required_tools_succeed():
                 success=True,
                 data=[],
             ),
-            ToolResult(tool_name="rag_search", success=True, data=[]),
+            ToolResult(
+                tool_name="rag_search",
+                success=True,
+                data=[],
+            ),
         ],
     )
 
@@ -143,7 +186,10 @@ def test_policy_stops_when_all_required_tools_succeed():
         ]
     )
 
-    result = agent.run_with_policy(context, MaintenanceInvestigationPolicy())
+    result = agent.run_with_policy(
+        context,
+        MaintenanceInvestigationPolicy(),
+    )
 
     assert result.iterations == 0
     assert result.stop_reason == "sufficient_evidence"
@@ -151,9 +197,6 @@ def test_policy_stops_when_all_required_tools_succeed():
 
 
 def test_policy_reports_blocked_when_no_action_is_available():
-    from app.agents.react_agent import ReActAgent
-    from app.context.models import RequestContext
-
     context = RequestContext(
         request_id="test-blocked",
         user_query="Investigate machine health",
@@ -169,9 +212,6 @@ def test_policy_reports_blocked_when_no_action_is_available():
 
 
 def test_policy_respects_iteration_limit():
-    from app.agents.react_agent import InvestigationAction, ReActAgent
-    from app.context.models import RequestContext
-
     context = RequestContext(
         request_id="test-limit",
         user_query="Investigate machine health",

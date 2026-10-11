@@ -101,3 +101,32 @@ def test_request_id_is_available_in_logging_context() -> None:
     assert response.status_code == 200
     assert response.headers["X-Request-ID"] == request_id
     assert response.json()["request_id"] == request_id
+
+def test_downstream_log_record_includes_request_id() -> None:
+    import logging
+
+    from app.observability.logging import (
+        RequestContextFilter,
+        request_id_context,
+    )
+
+    request_id = "downstream-correlation-456"
+    token = request_id_context.set(request_id)
+
+    try:
+        record = logging.LogRecord(
+            name="app.test.downstream",
+            level=logging.INFO,
+            pathname=__file__,
+            lineno=1,
+            msg="Downstream tool executed",
+            args=(),
+            exc_info=None,
+        )
+
+        log_filter = RequestContextFilter()
+
+        assert log_filter.filter(record) is True
+        assert record.request_id == request_id
+    finally:
+        request_id_context.reset(token)

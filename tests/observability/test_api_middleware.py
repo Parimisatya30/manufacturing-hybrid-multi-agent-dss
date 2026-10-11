@@ -2,7 +2,7 @@
 """Tests for FastAPI request observability middleware."""
 
 from fastapi.testclient import TestClient
-
+from opentelemetry import trace
 from app.main import app
 from app.observability.metrics import metrics
 
@@ -130,3 +130,67 @@ def test_downstream_log_record_includes_request_id() -> None:
         assert record.request_id == request_id
     finally:
         request_id_context.reset(token)
+
+
+def test_unexpected_exception_increments_error_counter_once() -> None:
+    from fastapi import HTTPException
+
+    before = metrics.snapshot()
+    errors_before = before["counters"].get("api.errors", 0)
+
+    @app.get("/test-observability-unexpected-error")
+    def unexpected_error_endpoint() -> None:
+        raise RuntimeError("Simulated unexpected failure")
+
+    # HTTPException would be handled by FastAPI, so use an unexpected
+    # exception and let the test client return the generated HTTP 500.
+    with TestClient(app, raise_server_exceptions=False) as error_client:
+        response = error_client.get(
+            "/test-observability-unexpected-error"
+        )
+
+    after = metrics.snapshot()
+
+    assert response.status_code == 500
+    assert (
+        after["counters"].get("api.errors", 0)
+        == errors_before + 1
+    )
+
+def test_downstream_span_shares_http_request_trace() -> None:
+    @app.get("/test-observability-trace")
+    def trace_endpoint() -> dict[str, object]:
+        parent_span = trace.get_current_span()
+        parent_context = parent_span.get_span_context()
+
+        downstream_tracer = trace.get_tracer("manufacturing-dss.test")
+
+        with downstream_tracer.start_as_current_span(
+            "test.downstream"
+        ) as downstream_span:
+            downstream_context = downstream_span.get_span_context()
+            downstream_parent = downstream_span.parent
+
+            return {
+                "parent_valid": parent_context.is_valid,
+                "parent_trace_id": format(parent_context.trace_id, "032x"),
+                "parent_span_id": format(parent_context.span_id, "016x"),
+                "downstream_trace_id": format(
+                    downstream_context.trace_id, "032x"
+                ),
+                "downstream_parent_span_id": (
+                    format(downstream_parent.span_id, "016x")
+                    if downstream_parent is not None
+                    else None
+                ),
+            }
+
+    response = client.get("/test-observability-trace")
+
+    assert response.status_code == 200
+
+    result = response.json()
+
+    assert result["parent_valid"] is True
+    assert result["parent_trace_id"] == result["downstream_trace_id"]
+    assert result["parent_span_id"] == result["downstream_parent_span_id"]

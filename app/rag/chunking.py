@@ -1,6 +1,6 @@
 from __future__ import annotations
 from uuid import uuid4
-
+import re
 from app.rag.models import Document, DocumentBlock, DocumentChunk
 
 
@@ -110,7 +110,11 @@ class SemanticChunker:
                 block_types.append(block.block_type)
 
         return DocumentChunk(
-            chunk_id=f"CHUNK-{uuid4()}",
+            # chunk_id=f"CHUNK-{uuid4()}",
+            chunk_id=(
+                f"CHUNK-{re.sub(r'[^A-Za-z0-9_-]+', '-', document.document_id)}"
+                f"-{chunk_index:03d}"
+            ),
             document_id=document.document_id,
             content="\n\n".join(content_parts),
             chunk_index=chunk_index,

@@ -1,0 +1,36 @@
+
+[
+  {
+    "query": "What are the warning and critical vibration thresholds?",
+    "relevant_chunk_ids": [
+      "CHUNK-Predictive_Maintenance_Condition_Monitoring-003"
+    ]
+  },
+  {
+    "query": "How should active predictive maintenance alerts be triaged?",
+    "relevant_chunk_ids": [
+      "CHUNK-Predictive_Maintenance_Condition_Monitoring-009"
+    ]
+  },
+  {
+    "query": "What is the plant-wide OEE and which machines have the lowest OEE?",
+    "relevant_chunk_ids": [
+      "CHUNK-KPI_Handbook-001",
+      "CHUNK-KPI_Handbook-002",
+      "CHUNK-Predictive_Maintenance_Condition_Monitoring-001"
+    ]
+  },
+  {
+    "query": "How should material defects be investigated and contained?",
+    "relevant_chunk_ids": [
+      "CHUNK-Root_Cause_Analysis_Guide-005"
+    ]
+  },
+  {
+    "query": "What are the first-pass yield targets and escalation thresholds?",
+    "relevant_chunk_ids": [
+      "CHUNK-KPI_Handbook-004",
+      "CHUNK-KPI_Handbook-005"
+    ]
+  }
+]

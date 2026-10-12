@@ -4,3 +4,5 @@ uvicorn[standard]
 opentelemetry-api
 opentelemetry-sdk
 sentence-transformers
+streamlit
+requests

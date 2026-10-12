@@ -1,4 +1,4 @@
-\# RAG Retrieval Evaluation Report
+﻿\# RAG Retrieval Evaluation Report
 
 
 
@@ -168,3 +168,44 @@ The initial retrieval evaluation framework is implemented, tested, committed, an
 
 
 
+## 10. End-to-End Workflow Validation
+
+### 10.1 Manufacturing Use Cases
+
+The three manufacturing workflows were exercised through the running API.
+
+| Use case | Validation result | Key observation |
+|---|---|---|
+| Predictive maintenance | Successful API response | Machine 8 was reported in a critical breakdown state. Vibration data was unavailable, so a vibration-based diagnosis could not be confirmed. Human approval remained pending. |
+| Root cause analysis (RCA) | Successful API response | SQL evidence and relevant knowledge-base content were retrieved. Potential root causes were treated as candidates rather than confirmed conclusions. |
+| Defect monitoring | Successful API response | The workflow evaluated 766 quality-control records and reported a warning based on an average defect rate of 2.57%, above the configured 2.0% warning threshold. |
+
+These results demonstrate execution of the three workflows against the available manufacturing data. They do not establish that every generated conclusion is factually correct.
+
+### 10.2 Automated Test Validation
+
+The complete automated test suite previously passed with **254 tests passing**. The focused response-generator tests also passed with **7 tests passing**.
+
+Response-generator tests cover:
+
+- Evidence-reference traceability.
+- Missing evidence references.
+- Empty findings.
+- Unavailable vibration data.
+- Preservation of the underlying decision when an LLM explanation is generated.
+- Graceful handling of LLM failures.
+- Avoiding LLM calls when no findings are available.
+
+### 10.3 Grounding and Traceability Safeguards
+
+The response generator links findings to evidence records using source IDs and exposes supporting evidence in the response. It also reports missing or unavailable sensor data and retains the deterministic decision when LLM explanation generation fails.
+
+**Important limitation:** Evidence-reference traceability confirms that referenced evidence records exist. It does not independently prove that the evidence semantically supports every claim. Semantic entailment verification is not currently implemented.
+
+### 10.4 Evaluation Limitations and Future Work
+
+- The three live workflow checks are functional validation examples, not a statistically representative accuracy benchmark.
+- Retrieval metrics measure ranking quality, not final-answer correctness or faithfulness.
+- The defect-monitoring result is an aggregate over available quality-control records; it should not be interpreted as a time-based defect trend.
+- API latency has not yet been established through a controlled benchmark.
+- Future evaluation should measure answer correctness, semantic grounding, latency, and behavior when tools, data sources, or the LLM are unavailable.

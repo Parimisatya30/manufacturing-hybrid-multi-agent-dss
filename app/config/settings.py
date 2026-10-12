@@ -1,4 +1,3 @@
-
 """Application configuration."""
 
 import os
@@ -8,8 +7,6 @@ from dotenv import load_dotenv
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-
-# Load the project's .env before reading environment variables.
 load_dotenv(PROJECT_ROOT / ".env")
 
 
@@ -21,6 +18,10 @@ class Settings:
 
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "ollama")
     LLM_MODEL: str = os.getenv("LLM_MODEL", "gemma3:4b")
+
+    # Demo-only supervisor ID. This is identification, not strong authentication.
+    APPROVAL_SUPERVISOR_ID: str = os.getenv("APPROVAL_SUPERVISOR_ID", "123")
+
     OLLAMA_BASE_URL: str = os.getenv(
         "OLLAMA_BASE_URL",
         "http://localhost:11434",
@@ -30,8 +31,11 @@ class Settings:
     )
 
     MES_DATABASE_PATH: Path = (
+        PROJECT_ROOT / os.getenv("MES_DATABASE_PATH", "data/raw/MES.db")
+    )
+    APPROVAL_DATABASE_PATH: Path = (
         PROJECT_ROOT
-        / os.getenv("MES_DATABASE_PATH", "data/raw/MES.db")
+        / os.getenv("APPROVAL_DATABASE_PATH", "data/processed/approvals.db")
     )
 
 

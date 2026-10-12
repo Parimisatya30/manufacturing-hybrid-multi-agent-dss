@@ -8,11 +8,11 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Manufacturing DSS",
-    page_icon="ðŸ­",
+    page_icon="🏭",
     layout="wide",
 )
 
-st.title("ðŸ­ Manufacturing Decision Support System")
+st.title("Manufacturing Decision Support System")
 st.caption(
     "Evidence-grounded manufacturing investigations "
     "with transparent findings and human oversight."
@@ -60,11 +60,11 @@ def render_findings(findings):
 
         with st.container(border=True):
             if severity in {"CRITICAL", "HIGH", "ERROR"}:
-                st.error(f"**{heading}** Â· {severity}")
+                st.error(f"**{heading}** · {severity}")
             elif severity in {"WARNING", "MEDIUM"}:
-                st.warning(f"**{heading}** Â· {severity}")
+                st.warning(f"**{heading}** · {severity}")
             else:
-                st.markdown(f"**{heading}** Â· {severity}")
+                st.markdown(f"**{heading}** · {severity}")
 
             reason = first_value(
                 finding.get("reason"),
@@ -83,9 +83,10 @@ def render_findings(findings):
                 st.caption(
                     "Supporting sources: " + display_value(supporting)
                 )
+
+
 def render_evidence(evidence):
     """Display evidence as readable tables or document passages."""
-
     if not isinstance(evidence, list) or not evidence:
         st.info("No supporting evidence was returned.")
         return
@@ -115,7 +116,7 @@ def render_evidence(evidence):
             item.get("text"),
         )
 
-        with st.expander(f"Evidence {index} Â· {source}"):
+        with st.expander(f"Evidence {index} · {source}"):
             st.caption(f"Source type: {source_type.upper()}")
 
             # SQL evidence: display returned records as a table.
@@ -154,30 +155,129 @@ def render_evidence(evidence):
             if score is not None:
                 st.caption(f"Retrieval relevance: {score:.3f}")
 
-def render_approval(approval):
-    """Make approval requirements visible."""
+
+def render_approval(approval, request_id, api_base_url, supervisor_id):
+    """Display approval status and submit a supervisor decision."""
     if not isinstance(approval, dict):
         return
 
     required = approval.get("required")
-    status = first_value(approval.get("status"), "Not specified")
+    status = str(first_value(approval.get("status"), "Not specified")).upper()
     reason = approval.get("reason")
+
+    # Prefer the latest decision returned by the approval API.
+    saved_decision = st.session_state.get(
+        f"approval_decision_{request_id}"
+    )
+    if isinstance(saved_decision, dict):
+        status = str(
+            first_value(saved_decision.get("status"), status)
+        ).upper()
+        reason = first_value(saved_decision.get("reason"), reason)
 
     st.markdown("### Human approval")
 
-    if required is True and str(status).upper() in {
-        "PENDING", "REQUIRED", "AWAITING_APPROVAL"
+    if required is True and status in {
+        "PENDING",
+        "REQUIRED",
+        "AWAITING_APPROVAL",
     }:
-        st.warning(f"Approval required Â· {status}")
+        st.warning(f"Approval required · {status}")
     elif required is True:
         st.info(f"Approval required: {status}")
     elif required is False:
-        st.success(f"Approval not required Â· {status}")
+        st.success(f"Approval not required · {status}")
     else:
         st.write(f"Approval status: {status}")
 
     if reason:
         st.write(reason)
+
+    # Only offer a decision for a pending approval record.
+    if required is True and status == "PENDING":
+        with st.form(f"approval_decision_form_{request_id}"):
+            st.markdown("#### Supervisor decision")
+
+            decision = st.radio(
+                "Decision",
+                options=["Approve", "Reject"],
+                horizontal=True,
+                key=f"approval_choice_{request_id}",
+            )
+
+            decision_reason = st.text_area(
+                "Reason (required)",
+                max_chars=2000,
+                key=f"approval_reason_{request_id}",
+                placeholder="Explain why this decision is appropriate.",
+            )
+
+            decision_submitted = st.form_submit_button(
+                "Submit decision",
+                type="primary",
+                use_container_width=True,
+            )
+
+        if decision_submitted:
+            if not supervisor_id.strip():
+                st.error("Enter Supervisor ID in the sidebar.")
+            elif not decision_reason.strip():
+                st.error("A reason is required to approve or reject.")
+            else:
+                try:
+                    with st.spinner("Submitting supervisor decision..."):
+                        response = requests.post(
+                            f"{api_base_url}/api/v1/approvals/"
+                            f"{request_id}/decision",
+                            json={
+                                "approved": decision == "Approve",
+                                "reason": decision_reason.strip(),
+                            },
+                            headers={
+                                "X-Supervisor-ID": supervisor_id.strip()
+                            },
+                            timeout=(5, 20),
+                        )
+
+                    try:
+                        response_data = response.json()
+                    except ValueError:
+                        response_data = {"detail": response.text}
+
+                    if response.ok and isinstance(response_data, dict):
+                        st.session_state[
+                            f"approval_decision_{request_id}"
+                        ] = response_data
+
+                        st.success(
+                            "Decision recorded: "
+                            f"{response_data.get('status', 'UPDATED')}"
+                        )
+                        st.rerun()
+                    else:
+                        detail = (
+                            response_data.get("detail", response_data)
+                            if isinstance(response_data, dict)
+                            else response_data
+                        )
+                        st.error(
+                            f"Approval request failed · "
+                            f"HTTP {response.status_code}: "
+                            f"{display_value(detail)}"
+                        )
+
+                except requests.exceptions.Timeout:
+                    st.error(
+                        "Approval request timed out. "
+                        "Check the FastAPI logs before retrying."
+                    )
+                except requests.exceptions.ConnectionError:
+                    st.error(
+                        "Cannot connect to FastAPI. "
+                        "Check that the backend is running."
+                    )
+                except requests.exceptions.RequestException as exc:
+                    st.error(f"Approval request failed: {exc}")
 
 
 def render_result(workflow, result, request_id):
@@ -232,10 +332,11 @@ def render_result(workflow, result, request_id):
         result.get("approval"),
     )
 
-    st.subheader(f"{workflow} Â· Investigation Result")
+    st.subheader(f"{workflow} · Investigation Result")
 
     if status is not None:
         status_text = str(status).upper()
+
         if status_text == "EVIDENCE_AVAILABLE":
             st.info("Investigation status: Evidence available")
         elif status_text in {"CRITICAL", "FAILED", "ERROR"}:
@@ -247,30 +348,30 @@ def render_result(workflow, result, request_id):
         else:
             st.info(f"Investigation status: {status_text}")
 
-        # if status_text in {"CRITICAL", "FAILED", "ERROR"}:
-        #     st.error(f"Overall status: {status_text}")
-        # elif status_text in {"WARNING", "DEGRADED"}:
-        #     st.warning(f"Overall status: {status_text}")
-        # elif status_text in {"HEALTHY", "NORMAL", "SUCCESS"}:
-        #     st.success(f"Overall status: {status_text}")
-        # else:
-        #     st.info(f"Overall status: {status_text}")
-
     if summary:
         st.markdown("### Summary")
         st.write(summary)
 
     # Show useful metrics when supplied by the API.
     metric_values = []
+
     for label, value in [
-        ("Evidence items", first_value(
-            decision.get("evidence_count"),
-            response_data.get("evidence_count"),
-            result.get("evidence_count"),
-        )),
-        ("Findings", len(findings) if isinstance(findings, list) else None),
-        ("Approval", approval.get("status")
-         if isinstance(approval, dict) else None),
+        (
+            "Evidence items",
+            first_value(
+                decision.get("evidence_count"),
+                response_data.get("evidence_count"),
+                result.get("evidence_count"),
+            ),
+        ),
+        (
+            "Findings",
+            len(findings) if isinstance(findings, list) else None,
+        ),
+        (
+            "Approval",
+            approval.get("status") if isinstance(approval, dict) else None,
+        ),
     ]:
         if value is not None:
             metric_values.append((label, value))
@@ -296,14 +397,29 @@ def render_result(workflow, result, request_id):
         st.markdown("### Supporting evidence")
         render_evidence(evidence)
 
-    render_approval(approval)
+    # Supervisor ID is defined in the sidebar below.
+    render_approval(
+        approval,
+        request_id,
+        api_base_url,
+        supervisor_id,
+    )
 
     # Show common workflow-specific fields without dumping the whole object.
     excluded = {
-        "decision", "response", "findings", "evidence", "summary",
-        "overall_status", "approval", "data_gaps", "llm_explanation",
-        "evidence_count", "request_id",
+        "decision",
+        "response",
+        "findings",
+        "evidence",
+        "summary",
+        "overall_status",
+        "approval",
+        "data_gaps",
+        "llm_explanation",
+        "evidence_count",
+        "request_id",
     }
+
     extras = {
         key: value
         for key, value in result.items()
@@ -314,8 +430,11 @@ def render_result(workflow, result, request_id):
         with st.expander("Additional investigation details"):
             for key, value in extras.items():
                 st.markdown(f"**{key.replace('_', ' ').title()}**")
+
                 if isinstance(value, list) and key in {
-                    "recommendations", "actions", "next_steps"
+                    "recommendations",
+                    "actions",
+                    "next_steps",
                 }:
                     for item in value:
                         st.write(f"- {display_value(item)}")
@@ -324,14 +443,17 @@ def render_result(workflow, result, request_id):
                 else:
                     st.write(display_value(value))
 
-    # with st.expander("Developer Details"):
-    #     st.caption(f"Request ID: {request_id}")
-    #     st.caption(f"HTTP status: 200")
-    #     st.json(result, expanded=False)
     st.caption(f"Investigation reference: {request_id}")
 
+
+# Backend configuration.
 api_base_url = "http://127.0.0.1:8000"
 
+supervisor_id = st.sidebar.text_input(
+    "Supervisor ID",
+    value="123",
+    help="Demo supervisor ID for approval decisions.",
+)
 
 workflow = st.selectbox(
     "Choose an investigation",
@@ -386,6 +508,7 @@ with st.form("investigation_form"):
         use_container_width=True,
     )
 
+
 if submitted:
     if not api_base_url:
         st.error("Enter the FastAPI base URL in the sidebar.")
@@ -393,6 +516,7 @@ if submitted:
         st.error("Enter an investigation question.")
     else:
         request_id = str(uuid.uuid4())
+
         payload = {
             "user_query": user_query.strip(),
             "request_id": request_id,
@@ -402,9 +526,7 @@ if submitted:
             payload["machine_id"] = int(machine_id)
 
         try:
-            with st.spinner(
-                f"Running {workflow.lower()}..."
-            ):
+            with st.spinner(f"Running {workflow.lower()}..."):
                 response = requests.post(
                     f"{api_base_url}{endpoint_map[workflow]}",
                     json=payload,
@@ -418,9 +540,15 @@ if submitted:
                 result = {"message": response.text}
 
             if response.ok and isinstance(result, dict):
-                render_result(workflow, result, request_id)
+                st.session_state["last_investigation"] = {
+                    "workflow": workflow,
+                    "result": result,
+                    "request_id": request_id,
+                }
             else:
-                st.error(f"API request failed Â· HTTP {response.status_code}")
+                st.error(
+                    f"API request failed · HTTP {response.status_code}"
+                )
                 st.write(result)
                 st.caption(f"Request ID: {request_id}")
 
@@ -436,6 +564,17 @@ if submitted:
             )
         except requests.exceptions.RequestException as exc:
             st.error(f"Request failed: {exc}")
+
+
+# Render the latest successful investigation on every Streamlit rerun.
+last_investigation = st.session_state.get("last_investigation")
+
+if last_investigation:
+    render_result(
+        last_investigation["workflow"],
+        last_investigation["result"],
+        last_investigation["request_id"],
+    )
 
 st.divider()
 st.caption(

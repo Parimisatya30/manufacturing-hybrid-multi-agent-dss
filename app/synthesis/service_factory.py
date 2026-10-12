@@ -13,7 +13,7 @@ from app.tools.rag_tool import RAGTool
 from app.tools.rules_tool import RulesTool
 from app.tools.sql_tool import SQLTool
 from app.workflows.maintenance_workflow import MaintenanceWorkflow
-
+from app.decision.approval_repository import ApprovalRepository
 
 def create_maintenance_service() -> MaintenanceService:
     """Initialize the components required for maintenance investigations."""
@@ -57,8 +57,10 @@ def create_maintenance_service() -> MaintenanceService:
         rules_tool=RulesTool(),
         evidence_collector=evidence_collector,
         decision_engine=DecisionEngine(),
+        approval_repository=ApprovalRepository(
+            settings.APPROVAL_DATABASE_PATH
+        ),
     )
-
     # Inject the optional LLM into response synthesis.
     response_generator = ResponseGenerator(
         llm_provider=llm_provider,

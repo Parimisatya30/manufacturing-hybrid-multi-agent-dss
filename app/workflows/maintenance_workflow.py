@@ -3,9 +3,11 @@
 
 from typing import Any
 from uuid import uuid4
-from app.decision.approval_policy import ApprovalPolicy
+
 from app.context.manager import ContextManager, create_request_context
 from app.context.models import ToolResult
+from app.decision.approval_policy import ApprovalPolicy
+from app.decision.approval_repository import ApprovalRepository
 from app.decision.decision_engine import DecisionEngine
 from app.evidence.collector import EvidenceCollector
 from app.tools.rag_tool import RAGTool
@@ -23,12 +25,14 @@ class MaintenanceWorkflow:
         rules_tool: RulesTool,
         evidence_collector: EvidenceCollector,
         decision_engine: DecisionEngine,
+        approval_repository: ApprovalRepository | None = None,
     ) -> None:
         self.sql_tool = sql_tool
         self.rag_tool = rag_tool
         self.rules_tool = rules_tool
         self.evidence_collector = evidence_collector
         self.decision_engine = decision_engine
+        self.approval_repository = approval_repository
 
     def run(
         self,
@@ -151,7 +155,10 @@ class MaintenanceWorkflow:
 
         try:
             rag_results = self.rag_tool.search(
-                query=f"Maintenance procedures and troubleshooting for machine {machine_id}: {user_query}",
+                query=(
+                    f"Maintenance procedures and troubleshooting "
+                    f"for machine {machine_id}: {user_query}"
+                ),
                 top_k=3,
             )
             context_manager.add_tool_result(
@@ -186,14 +193,36 @@ class MaintenanceWorkflow:
 
         decision = self.decision_engine.evaluate(context)
 
-        # Phase 16: determine whether human approval is required.
+        # Determine whether human approval is required.
         approval_decision = ApprovalPolicy().evaluate(decision)
 
-        decision["approval"] = {
+        approval: dict[str, Any] = {
             "required": approval_decision.required,
             "status": approval_decision.status.value,
             "reason": approval_decision.reason,
+            "record_id": None,
+            "approver": None,
+            "decided_at": None,
         }
+
+        # Persist approval only when required and a repository is configured.
+        if approval_decision.required and self.approval_repository is not None:
+            approval_record = self.approval_repository.get_or_create_pending(
+                request_id=context.request_id,
+                reason=approval_decision.reason,
+            )
+
+            approval.update(
+                {
+                    "record_id": approval_record["id"],
+                    "status": approval_record["status"],
+                    "reason": approval_record["reason"],
+                    "approver": approval_record["approver"],
+                    "decided_at": approval_record["decided_at"],
+                }
+            )
+
+        decision["approval"] = approval
 
         decision["machine_id"] = machine_id
         decision["data_availability"] = {
@@ -222,7 +251,8 @@ class MaintenanceWorkflow:
         decision["false_positive_alerts"] = [
             record
             for record in maintenance_records
-            if str(record.get("Status", "")).strip().lower() == "false_positive"
+            if str(record.get("Status", "")).strip().lower()
+            == "false_positive"
         ]
 
         # Missing sensor readings mean unknown, not normal.

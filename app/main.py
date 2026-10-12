@@ -5,7 +5,7 @@ import logging
 import re
 import time
 from uuid import uuid4
-
+from app.api.approval_routes import router as approval_router
 from fastapi import FastAPI, Request
 from opentelemetry import trace
 
@@ -121,6 +121,7 @@ async def observability_middleware(request: Request, call_next):
 app.include_router(router)
 app.include_router(defect_router)
 app.include_router(rca_router)
+app.include_router(approval_router)
 
 @app.get("/health", tags=["Health"])
 def health_check() -> dict[str, str]:

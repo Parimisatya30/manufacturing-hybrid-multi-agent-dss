@@ -121,3 +121,49 @@ def test_vibration_data_with_missing_rms_is_incomplete(workflow):
     result = workflow.run(1, "Check sensor data")
 
     assert result["sensor_data_status"] == "INCOMPLETE"
+
+
+def test_critical_finding_persists_pending_approval(workflow, tmp_path):
+    from app.decision.approval_repository import ApprovalRepository
+
+    repository = ApprovalRepository(tmp_path / "approvals.db")
+    workflow.approval_repository = repository
+
+    workflow.sql_tool.execute.side_effect = [
+        [{"MachineID": 8, "Status": "breakdown"}],
+        [],
+        [],
+    ]
+
+    result = workflow.run(
+        8,
+        "Investigate machine breakdown",
+        request_id="approval-test-critical",
+    )
+
+    approval = result["approval"]
+    record = repository.get_latest("approval-test-critical")
+
+    assert approval["required"] is True
+    assert approval["status"] == "PENDING"
+    assert approval["record_id"] is not None
+    assert record is not None
+    assert record["status"] == "PENDING"
+
+
+def test_non_critical_finding_does_not_create_approval(workflow, tmp_path):
+    from app.decision.approval_repository import ApprovalRepository
+
+    repository = ApprovalRepository(tmp_path / "approvals.db")
+    workflow.approval_repository = repository
+
+    result = workflow.run(
+        10,
+        "Assess maintenance risk",
+        request_id="approval-test-normal",
+    )
+
+    assert result["approval"]["required"] is False
+    assert result["approval"]["status"] == "NOT_REQUIRED"
+    assert result["approval"]["record_id"] is None
+    assert repository.get_latest("approval-test-normal") is None

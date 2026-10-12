@@ -6,3 +6,6 @@ opentelemetry-sdk
 sentence-transformers
 streamlit
 requests
+PyMuPDF
+pytest
+httpx
